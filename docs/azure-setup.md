@@ -6,6 +6,31 @@ This project uses resources designed for low-to-zero cost during development. Be
 
 - An active Azure Subscription
 - Azure CLI installed locally (`az login`)
+- Bicep CLI (`az bicep install`)
+
+## Infrastructure as Code (Recommended)
+
+The infrastructure can be deployed using Bicep templates located in the `infra/` directory.
+
+### Deploy with Bicep
+
+```bash
+# Login to Azure
+az login
+
+# Create resource group
+az group create --name rg-jatt-dev --location eastus
+
+# Deploy infrastructure
+az deployment group create \
+    --resource-group rg-jatt-dev \
+    --template-file infra/main.bicep \
+    --parameters baseName=jatt environment=dev
+```
+
+### Manual Setup (Alternative)
+
+If you prefer to create resources manually, follow the steps below.
 
 ## 1. Resource Group
 
@@ -65,11 +90,6 @@ az staticwebapp create \
     --sku Free \
     --location eastus2
 ```
-
-> **Note**: Build configuration for Azure Static Web Apps should use:
->
-> - Build command: `npx nx build jatt-web`
-> - App location: `dist/apps/jatt-web`
 
 ## 5. Configure Secrets
 
