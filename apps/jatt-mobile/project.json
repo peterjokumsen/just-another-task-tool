@@ -1,0 +1,9 @@
+{
+  "name": "jatt-mobile",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/jatt-mobile/src",
+  "projectType": "application",
+  "tags": [],
+  "// targets": "to see all targets run: nx show project jatt-mobile --web",
+  "targets": {}
+}

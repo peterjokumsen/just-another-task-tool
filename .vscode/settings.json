@@ -24,5 +24,11 @@
     "statusBar.debuggingForeground": "#e7e7e7",
     "tab.activeBorder": "#2f7c47"
 },
-  "peacock.color": "#215732"
+  "peacock.color": "#215732",
+  "azureFunctions.projectSubpath": "apps/jatt-api",
+  "azureFunctions.deploySubpath": "apps/jatt-api/bin/Release/net10.0/publish",
+  "azureFunctions.projectLanguage": "C#",
+  "azureFunctions.projectRuntime": "~4",
+  "debug.internalConsoleOptions": "neverOpen",
+  "azureFunctions.preDeployTask": "publish (functions)"
 }

@@ -1,0 +1,48 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.2.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "apps", "apps", "{1787FE1D-075E-9E68-7218-25F1BD1BBEAB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "jatt-api", "apps\jatt-api\jatt-api.csproj", "{AF787B82-D9B7-F2EF-EBAE-1231CE384088}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "jatt-api (1)", "jatt-api (1)", "{9F949F40-CE4C-33F1-EB0D-796812D46089}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "obj", "obj", "{E9C8343C-A75A-5570-4163-0A4A15908833}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Debug", "Debug", "{770DA49E-3D81-64BC-2B60-C9B7B88A02C1}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "net10.0", "net10.0", "{EEAEAB8D-D0BC-7676-87C5-14C6D75661DC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WorkerExtensions", "apps\jatt-api\obj\Debug\net10.0\WorkerExtensions\WorkerExtensions.csproj", "{21063DC4-CC3B-923A-2164-D01840C6AD8D}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{AF787B82-D9B7-F2EF-EBAE-1231CE384088}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AF787B82-D9B7-F2EF-EBAE-1231CE384088}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AF787B82-D9B7-F2EF-EBAE-1231CE384088}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AF787B82-D9B7-F2EF-EBAE-1231CE384088}.Release|Any CPU.Build.0 = Release|Any CPU
+		{21063DC4-CC3B-923A-2164-D01840C6AD8D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{21063DC4-CC3B-923A-2164-D01840C6AD8D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{21063DC4-CC3B-923A-2164-D01840C6AD8D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{21063DC4-CC3B-923A-2164-D01840C6AD8D}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{AF787B82-D9B7-F2EF-EBAE-1231CE384088} = {1787FE1D-075E-9E68-7218-25F1BD1BBEAB}
+		{9F949F40-CE4C-33F1-EB0D-796812D46089} = {1787FE1D-075E-9E68-7218-25F1BD1BBEAB}
+		{E9C8343C-A75A-5570-4163-0A4A15908833} = {9F949F40-CE4C-33F1-EB0D-796812D46089}
+		{770DA49E-3D81-64BC-2B60-C9B7B88A02C1} = {E9C8343C-A75A-5570-4163-0A4A15908833}
+		{EEAEAB8D-D0BC-7676-87C5-14C6D75661DC} = {770DA49E-3D81-64BC-2B60-C9B7B88A02C1}
+		{21063DC4-CC3B-923A-2164-D01840C6AD8D} = {EEAEAB8D-D0BC-7676-87C5-14C6D75661DC}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {7F5AE004-67B9-4EF9-9A56-14ECFCB8FDE9}
+	EndGlobalSection
+EndGlobal
