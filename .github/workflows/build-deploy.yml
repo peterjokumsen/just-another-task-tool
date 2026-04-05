@@ -25,26 +25,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
-
-      - name: Get pnpm store directory
-        shell: bash
-        run: |
-          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
-
-      - name: Setup pnpm cache
-        uses: actions/cache@v4
-        with:
-          path: ${{ env.STORE_PATH }}
-          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-pnpm-store-
+          cache: 'pnpm'
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -68,7 +56,7 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '8.0.x'
+          dotnet-version: '10.0.x'
 
       - name: Restore dependencies
         working-directory: ./apps/jatt-api
@@ -76,13 +64,12 @@ jobs:
 
       - name: Publish Functions
         working-directory: ./apps/jatt-api
-        run: dotnet publish -c Release -o ../dist/functions
+        run: dotnet publish -c Release -o ../../dist/functions
 
       - name: Create deployment package
         run: |
-          cd apps
-          zip -r ../dist/api.zip jatt-api
-          mv jatt-api/dist/functions apps/
+          cd dist
+          zip -r api.zip functions
 
       - name: Upload API artifact
         uses: actions/upload-artifact@v4
@@ -97,28 +84,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: ${{ env.PNPM_VERSION }}
-
-      - name: Get pnpm store directory
-        shell: bash
-        run: |
-          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
-
-      - name: Setup pnpm cache
-        uses: actions/cache@v4
-        with:
-          path: ${{ env.STORE_PATH }}
-          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-pnpm-store-
+          cache: 'pnpm'
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -133,9 +106,39 @@ jobs:
           path: apps/jatt-mobile/android/app/build/outputs/apk
           retention-days: 1
 
+  deploy-infra:
+    name: Deploy Infrastructure
+    runs-on: ubuntu-latest
+    environment: dev
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ env.AZURE_CLIENT_ID }}
+          tenant-id: ${{ env.AZURE_TENANT_ID }}
+          subscription-id: ${{ env.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Create Resource Group
+        uses: azure/cli@v2
+        with:
+          inlineScript: |
+            az group create \
+              --name "rg-jatt-dev" \
+              --location eastus
+
+      - name: Deploy Infrastructure
+        uses: azure/arm-deploy@v2
+        with:
+          scope: resourcegroup
+          resourceGroupName: 'rg-jatt-dev'
+          template: ./infra/main.bicep
+          parameters: ./infra/parameters.bicepparam
+
   deploy-web:
     name: Deploy Web
-    needs: build-web
+    needs: [build-web, deploy-infra]
     runs-on: ubuntu-latest
     environment: dev
     steps:
@@ -163,7 +166,7 @@ jobs:
 
   deploy-api:
     name: Deploy API
-    needs: build-api
+    needs: [build-api, deploy-infra]
     runs-on: ubuntu-latest
     environment: dev
     steps:
