@@ -51,7 +51,7 @@ module staticWebApp 'modules/staticwebapp.bicep' = {
   name: 'staticwebapp-deployment'
   params: {
     name: 'stapp-${resourcePrefix}'
-    location: location
+    location: 'eastus2'
   }
 }
 
