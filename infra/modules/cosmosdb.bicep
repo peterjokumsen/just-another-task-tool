@@ -104,6 +104,5 @@ resource cosmosDbContainerUsers 'Microsoft.DocumentDB/databaseAccounts/sqlDataba
 
 output id string = cosmosDbAccount.id
 output name string = cosmosDbAccount.name
-output connectionString string = cosmosDbAccount.listConnectionStrings().connectionStrings[0].connectionString
 output endpoint string = cosmosDbAccount.properties.documentEndpoint
 output databaseId string = databaseName

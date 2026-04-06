@@ -7,12 +7,14 @@ param location string
 @description('Storage account name')
 param storageAccountName string
 
+/*
 @description('Cosmos DB connection string')
 @secure()
 param cosmosDbConnectionString string
 
 @description('Cosmos DB database ID')
 param cosmosDbDatabaseId string
+*/
 
 @description('Functions runtime')
 param runtime string = 'dotnet-isolated'
@@ -49,20 +51,20 @@ resource functionsApp 'Microsoft.Web/sites@2024-04-01' = {
       appSettings: [
         {
           name: 'AzureWebJobsStorage'
-          value: 'DefaultEndpointsProtocol=https;AccountName=${storageAccountName};EndpointSuffix=${environment().suffixes.storage};AccountKey=${storageAccount.listKeys().connectionStrings[0]}'
+          value: 'DefaultEndpointsProtocol=https;AccountName=${storageAccountName};EndpointSuffix=${environment().suffixes.storage};AccountKey=${storageAccount.listKeys().keys[0].value}'
         }
         {
           name: 'FUNCTIONS_WORKER_RUNTIME'
           value: runtime
         }
-        {
+        /*{
           name: 'CosmosDbConnectionString'
           value: cosmosDbConnectionString
         }
         {
           name: 'CosmosDbDatabaseId'
           value: cosmosDbDatabaseId
-        }
+        }*/
         {
           name: 'WEBSITE_RUN_FROM_PACKAGE'
           value: '1'
@@ -73,13 +75,10 @@ resource functionsApp 'Microsoft.Web/sites@2024-04-01' = {
         }
       ]
     }
-    httpsConfig: {
-      certificateTransportProtocol: 'Sni'
-    }
+    httpsOnly: true
   }
   dependsOn: [
     storageAccount
-    functionsAppServicePlan
   ]
 }
 
@@ -90,5 +89,4 @@ resource storageAccount 'Microsoft.Storage/storageAccounts@2024-01-01' existing 
 output id string = functionsApp.id
 output name string = functionsApp.name
 output url string = 'https://${functionsApp.properties.defaultHostName}'
-output apiKey string = listkeys('${functionsApp.id}/host/default', '2022-09-01').functionKeys.default
 output principalId string = functionsApp.identity.principalId

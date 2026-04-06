@@ -40,8 +40,8 @@ module functions 'modules/functions.bicep' = {
     name: 'func-${resourcePrefix}'
     location: location
     storageAccountName: storage.outputs.name
-    cosmosDbConnectionString: cosmosDb.outputs.connectionString
-    cosmosDbDatabaseId: cosmosDb.outputs.databaseId
+    // cosmosDbConnectionString: 
+    // cosmosDbDatabaseId: cosmosDb.outputs.databaseId
     runtime: 'dotnet-isolated'
     runtimeVersion: '10'
   }
@@ -52,7 +52,6 @@ module staticWebApp 'modules/staticwebapp.bicep' = {
   params: {
     name: 'stapp-${resourcePrefix}'
     location: location
-    apiKey: functions.outputs.apiKey
   }
 }
 
