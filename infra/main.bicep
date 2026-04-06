@@ -16,7 +16,7 @@ param enableFreeTier bool = true
 var uniqueSuffix = '${environment}-${substring(uniqueString(baseName), 0, 6)}'
 var resourcePrefix = 'jatt-${uniqueSuffix}'
 
-module cosmosDb 'cosmosdb.bicep' = {
+module cosmosDb 'modules/cosmosdb.bicep' = {
   name: 'cosmosdb-deployment'
   params: {
     name: 'cosmos-${resourcePrefix}'
@@ -26,7 +26,7 @@ module cosmosDb 'cosmosdb.bicep' = {
   }
 }
 
-module storage 'storage.bicep' = {
+module storage 'modules/storage.bicep' = {
   name: 'storage-deployment'
   params: {
     name: 'st${resourcePrefix}'
@@ -34,7 +34,7 @@ module storage 'storage.bicep' = {
   }
 }
 
-module functions 'functions.bicep' = {
+module functions 'modules/functions.bicep' = {
   name: 'functions-deployment'
   params: {
     name: 'func-${resourcePrefix}'
@@ -43,11 +43,11 @@ module functions 'functions.bicep' = {
     cosmosDbConnectionString: cosmosDb.outputs.connectionString
     cosmosDbDatabaseId: cosmosDb.outputs.databaseId
     runtime: 'dotnet-isolated'
-    runtimeVersion: '8'
+    runtimeVersion: '10'
   }
 }
 
-module staticWebApp 'staticwebapp.bicep' = {
+module staticWebApp 'modules/staticwebapp.bicep' = {
   name: 'staticwebapp-deployment'
   params: {
     name: 'stapp-${resourcePrefix}'
