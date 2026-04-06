@@ -130,7 +130,7 @@ jobs:
           inlineScript: |
             az group create \
               --name "rg-jatt-dev" \
-              --location eastus
+              --location westeurope
 
       - name: Deploy Infrastructure
         uses: azure/arm-deploy@v2
