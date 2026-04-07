@@ -1,8 +1,5 @@
 targetScope = 'resourceGroup'
 
-@description('Base name for all resources')
-param baseName string
-
 @description('Environment (dev, staging, prod)')
 @allowed(['dev', 'staging', 'prod'])
 param environment string = 'dev'
@@ -13,8 +10,7 @@ param location string = resourceGroup().location
 @description('Cosmos DB free tier setting')
 param enableFreeTier bool = true
 
-var uniqueSuffix = '${environment}-${substring(uniqueString(baseName), 0, 6)}'
-var resourcePrefix = 'jatt-${uniqueSuffix}'
+var resourcePrefix = 'jatt-${environment}'
 
 module cosmosDb 'modules/cosmosdb.bicep' = {
   name: 'cosmosdb-deployment'
@@ -51,7 +47,7 @@ module staticWebApp 'modules/staticwebapp.bicep' = {
   name: 'staticwebapp-deployment'
   params: {
     name: 'stapp-${resourcePrefix}'
-    location: 'eastus2'
+    location: 'westeurope'
   }
 }
 
