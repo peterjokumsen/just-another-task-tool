@@ -28,7 +28,7 @@ module cosmosDb 'modules/cosmosdb.bicep' = {
 module storage 'modules/storage.bicep' = {
   name: 'storage-deployment'
   params: {
-    name: 'st${resourcePrefix}'
+    name: 'st${replace(resourcePrefix, '-', '')}'
     location: location
   }
 }
