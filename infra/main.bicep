@@ -1,5 +1,8 @@
 targetScope = 'resourceGroup'
 
+@description('Base name for all resources')
+param baseName string = 'jatt'
+
 @description('Environment (dev, staging, prod)')
 @allowed(['dev', 'staging', 'prod'])
 param environment string = 'dev'
@@ -10,7 +13,7 @@ param location string = resourceGroup().location
 @description('Cosmos DB free tier setting')
 param enableFreeTier bool = true
 
-var resourcePrefix = 'jatt-${environment}'
+var resourcePrefix = '${baseName}-${environment}'
 
 module cosmosDb 'modules/cosmosdb.bicep' = {
   name: 'cosmosdb-deployment'

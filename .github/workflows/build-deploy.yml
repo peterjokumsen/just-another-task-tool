@@ -189,8 +189,8 @@ jobs:
       - name: Deploy to Azure Functions
         run: |
           az functionapp deployment source config-zip \
-            --resource-group "rg-jatt-dev" \
-            --name "func-jatt-dev" \
+            --resource-group "rg-jatt-${{ inputs.environment }}" \
+            --name "func-jatt-${{ inputs.environment }}" \
             --src api.zip
 
       - name: Azure Logout
