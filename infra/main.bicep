@@ -13,10 +13,13 @@ param location string = resourceGroup().location
 @description('Cosmos DB free tier setting')
 param enableFreeTier bool = true
 
+@description('Timestamp of the current deployment')
+param timestamp string
+
 var resourcePrefix = '${baseName}-${environment}'
 
 module cosmosDb 'modules/cosmosdb.bicep' = {
-  name: 'cosmosdb-deployment'
+  name: 'cosmosdb-deployment-${timestamp}'
   params: {
     name: 'cosmos-${resourcePrefix}'
     location: location
@@ -26,7 +29,7 @@ module cosmosDb 'modules/cosmosdb.bicep' = {
 }
 
 module storage 'modules/storage.bicep' = {
-  name: 'storage-deployment'
+  name: 'storage-deployment-${timestamp}'
   params: {
     name: 'st${replace(resourcePrefix, '-', '')}'
     location: location
@@ -34,7 +37,7 @@ module storage 'modules/storage.bicep' = {
 }
 
 module functions 'modules/functions.bicep' = {
-  name: 'functions-deployment'
+  name: 'functions-deployment-${timestamp}'
   params: {
     name: 'func-${resourcePrefix}'
     location: location
@@ -47,7 +50,7 @@ module functions 'modules/functions.bicep' = {
 }
 
 module staticWebApp 'modules/staticwebapp.bicep' = {
-  name: 'staticwebapp-deployment'
+  name: 'staticwebapp-deployment-${timestamp}'
   params: {
     name: 'stapp-${resourcePrefix}'
     location: location

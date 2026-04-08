@@ -114,6 +114,8 @@ jobs:
     name: Deploy Infrastructure
     runs-on: ubuntu-latest
     environment: dev
+    env:
+      TIMESTAMP: 'TBD'
     steps:
       - uses: actions/checkout@v4
 
@@ -130,7 +132,10 @@ jobs:
           inlineScript: |
             az group create \
               --name "rg-jatt-dev" \
-              --location westeurope
+              --location eastus2
+
+      - name: Create timestamp
+        run: echo "TIMESTAMP=$(date +'%Y%m%d_%H%M%S')" >> $GITHUB_ENV
 
       - name: Deploy Infrastructure
         uses: azure/arm-deploy@v2
@@ -139,6 +144,7 @@ jobs:
           resourceGroupName: 'rg-jatt-dev'
           template: ./infra/main.bicep
           parameters: ./infra/parameters.bicepparam
+          deploymentName: rg-jatt-dev-${{ env.TIMESTAMP }}
 
   deploy-web:
     name: Deploy Web
@@ -189,8 +195,8 @@ jobs:
       - name: Deploy to Azure Functions
         run: |
           az functionapp deployment source config-zip \
-            --resource-group "rg-jatt-${{ inputs.environment }}" \
-            --name "func-jatt-${{ inputs.environment }}" \
+            --resource-group "rg-jatt-dev" \
+            --name "func-jatt-dev" \
             --src api.zip
 
       - name: Azure Logout
