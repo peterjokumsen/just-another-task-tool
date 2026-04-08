@@ -57,9 +57,42 @@ module staticWebApp 'modules/staticwebapp.bicep' = {
   }
 }
 
+module registry 'modules/registry.bicep' = {
+  name: 'registry-deployment-${timestamp}'
+  params: {
+    name: 'cr${replace(resourcePrefix, '-', '')}'
+    location: location
+  }
+}
+
+module aiServices 'modules/aiservices.bicep' = {
+  name: 'aiservices-deployment-${timestamp}'
+  params: {
+    name: 'ai-${resourcePrefix}'
+    location: location
+    sku: 'F0'
+  }
+}
+
+module containerApp 'modules/containerapp.bicep' = {
+  name: 'containerapp-deployment-${timestamp}'
+  params: {
+    name: 'aca-${resourcePrefix}'
+    environmentName: 'cae-${resourcePrefix}'
+    location: location
+    registryName: registry.outputs.name
+    registryLoginServer: registry.outputs.loginServer
+    aiServicesEndpoint: aiServices.outputs.endpoint
+    aiServicesKey: aiServices.outputs.primaryKey
+  }
+}
+
 output resourceGroup string = resourceGroup().name
 output cosmosDbName string = cosmosDb.outputs.name
 output functionsName string = functions.outputs.name
 output functionsUrl string = functions.outputs.url
 output staticWebAppName string = staticWebApp.outputs.name
 output staticWebAppUrl string = staticWebApp.outputs.url
+output containerRegistryName string = registry.outputs.name
+output aiServicesEndpoint string = aiServices.outputs.endpoint
+output containerAppUrl string = containerApp.outputs.url

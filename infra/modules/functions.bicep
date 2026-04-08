@@ -32,7 +32,7 @@ resource functionsAppServicePlan 'Microsoft.Web/serverfarms@2024-04-01' = {
   kind: 'linux'
   properties: {
     reserved: true
-    targetWorkerCount: 0
+    targetWorkerCount: 1
     targetWorkerSizeId: 0
   }
 }
