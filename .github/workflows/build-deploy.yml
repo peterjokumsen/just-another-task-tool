@@ -160,7 +160,7 @@ jobs:
           inlineScript: |
             az group create \
               --name "rg-jatt-dev" \
-              --location eastus2
+              --location westus2
 
       - name: Create timestamp
         run: echo "TIMESTAMP=$(date +'%Y%m%d_%H%M%S')" >> $GITHUB_ENV
