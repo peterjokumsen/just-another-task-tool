@@ -83,7 +83,7 @@ module containerApp 'modules/containerapp.bicep' = {
     registryName: registry.outputs.name
     registryLoginServer: registry.outputs.loginServer
     aiServicesEndpoint: aiServices.outputs.endpoint
-    aiServicesKey: aiServices.outputs.primaryKey
+    aiServicesName: aiServices.outputs.name
   }
 }
 

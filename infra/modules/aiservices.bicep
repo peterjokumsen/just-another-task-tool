@@ -23,4 +23,3 @@ resource aiServices 'Microsoft.CognitiveServices/accounts@2023-05-01' = {
 output endpoint string = aiServices.properties.endpoint
 output id string = aiServices.id
 output name string = aiServices.name
-output primaryKey string = aiServices.listKeys().key1

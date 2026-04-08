@@ -16,9 +16,8 @@ param registryLoginServer string
 @description('AI Services endpoint')
 param aiServicesEndpoint string
 
-@secure()
-@description('AI Services key')
-param aiServicesKey string
+@description('AI Services resource name')
+param aiServicesName string
 
 resource logAnalytics 'Microsoft.OperationalInsights/workspaces@2022-10-01' = {
   name: 'log-${name}'
@@ -68,7 +67,7 @@ resource containerApp 'Microsoft.App/containerApps@2023-05-01' = {
         }
         {
           name: 'ai-services-key'
-          value: aiServicesKey
+          value: listKeys(resourceId('Microsoft.CognitiveServices/accounts', aiServicesName), '2023-05-01').key1
         }
       ]
     }
