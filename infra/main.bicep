@@ -70,7 +70,7 @@ module aiServices 'modules/aiservices.bicep' = {
   params: {
     name: 'ai-${resourcePrefix}'
     location: location
-    sku: 'F0'
+    sku: 'S0'
   }
 }
 

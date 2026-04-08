@@ -5,7 +5,7 @@ param name string
 param location string = resourceGroup().location
 
 @description('SKU for the AI Services resource')
-param sku string = 'F0'
+param sku string = 'S0'
 
 resource aiServices 'Microsoft.CognitiveServices/accounts@2023-05-01' = {
   name: name
