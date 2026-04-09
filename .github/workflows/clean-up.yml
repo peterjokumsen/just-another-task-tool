@@ -1,0 +1,34 @@
+# .github/workflows/clean-up.yml
+name: Clean up Azure
+
+on:
+  workflow_dispatch:
+
+# These permissions are required for OIDC token generation
+permissions:
+  id-token: write # Required for requesting the OIDC JWT
+  contents: read # Required for actions/checkout
+
+jobs:
+  deploy:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      # Check out the repository code
+      - uses: actions/checkout@v4
+
+      # Authenticate to Azure using OIDC
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Delete Resource Group
+        uses: azure/cli@v2
+        with:
+          inlineScript: |
+            az group delete \
+              --name "rg-jatt-dev" \
+              --yes
