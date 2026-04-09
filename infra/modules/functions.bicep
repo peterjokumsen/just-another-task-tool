@@ -20,14 +20,14 @@ param cosmosDbDatabaseId string
 param runtime string = 'dotnet-isolated'
 
 @description('Runtime version')
-param runtimeVersion string = '8'
+param runtimeVersion string = '10.0'
 
 resource functionsAppServicePlan 'Microsoft.Web/serverfarms@2024-04-01' = {
   name: '${name}-asp'
   location: location
   sku: {
-    name: 'Y1'
-    tier: 'Dynamic'
+    name: 'FC1'
+    tier: 'FlexConsumption'
   }
   kind: 'linux'
   properties: {
