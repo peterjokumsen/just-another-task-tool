@@ -256,9 +256,36 @@ jobs:
           docker tag $ACR_NAME.azurecr.io/$SERVICE_NAME:$IMAGE_TAG $ACR_NAME.azurecr.io/$SERVICE_NAME:$TIMESTAMP
           docker push $ACR_NAME.azurecr.io/$SERVICE_NAME:$TIMESTAMP
 
-  deploy:
-    name: Deploy Application
+  deploy_aca:
+    name: Deploy Container App
     needs: [setup, deploy-infra, build, build-ai-service]
+    runs-on: ubuntu-latest
+    environment: dev
+    steps:
+      - name: Azure Login
+        uses: azure/login@v3
+        with:
+          client-id: ${{ env.AZURE_CLIENT_ID }}
+          tenant-id: ${{ env.AZURE_TENANT_ID }}
+          subscription-id: ${{ env.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Update Container App
+        if: needs.build.outputs.ai_service_affected == 'true'
+        run: |
+          ACR_NAME="crjattdev"
+          SERVICE_NAME="aca-jatt-dev"
+          IMAGE_TAG="${{ needs.setup.outputs.timestamp }}"
+
+          az provider register -n Microsoft.App --wait
+
+          az containerapp update \
+            --name $SERVICE_NAME \
+            --resource-group "rg-jatt-dev" \
+            --image $ACR_NAME.azurecr.io/$SERVICE_NAME:$IMAGE_TAG
+
+  deploy_others:
+    name: Deploy SWA and API
+    needs: [setup, deploy-infra, build]
     runs-on: ubuntu-latest
     environment: dev
     steps:
@@ -309,17 +336,3 @@ jobs:
             --resource-group "rg-jatt-dev" \
             --name "func-jatt-dev" \
             --src api.zip
-
-      - name: Update Container App
-        if: needs.build.outputs.ai_service_affected == 'true'
-        run: |
-          ACR_NAME="crjattdev"
-          SERVICE_NAME="aca-jatt-dev"
-          IMAGE_TAG="${{ needs.setup.outputs.timestamp }}"
-
-          az provider register -n Microsoft.App --wait
-
-          az containerapp update \
-            --name $SERVICE_NAME \
-            --resource-group "rg-jatt-dev" \
-            --image $ACR_NAME.azurecr.io/$SERVICE_NAME:$IMAGE_TAG
