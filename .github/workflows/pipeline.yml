@@ -1,0 +1,205 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - 'docs/**'
+      - '*.md'
+
+permissions:
+  id-token: write
+  contents: read
+  actions: read
+
+env:
+  AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+  AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+  AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+  NODE_VERSION: '24'
+  TIMESTAMP: ''
+
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+    outputs:
+      timestamp: ${{ steps.t.outputs.timestamp }}
+    steps:
+      - id: t
+        run: echo "timestamp=$(date +%Y-%m-%d_%H-%M)" >> $GITHUB_OUTPUT
+
+  deploy-infra:
+    name: Deploy Infrastructure
+    runs-on: ubuntu-latest
+    environment: dev
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Azure Login
+        uses: azure/login@v3
+        with:
+          client-id: ${{ env.AZURE_CLIENT_ID }}
+          tenant-id: ${{ env.AZURE_TENANT_ID }}
+          subscription-id: ${{ env.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Create Resource Group
+        uses: azure/cli@v3
+        with:
+          inlineScript: |
+            az group create \
+              --name "rg-jatt-dev" \
+              --location westus2
+
+      - name: Create timestamp
+        run: echo "TIMESTAMP=$(date +'%Y%m%d_%H%M%S')" >> $GITHUB_ENV
+
+      - name: Deploy Infrastructure
+        uses: azure/bicep-deploy@v2
+        with:
+          type: deployment
+          operation: create
+          scope: resourcegroup
+          resource-group-name: 'rg-jatt-dev'
+          template-file: ./infra/main.bicep
+          parameters-file: ./infra/parameters.bicepparam
+          location: westus2
+          name: rg-jatt-dev-${{ env.TIMESTAMP }}
+
+  build:
+    name: Build and Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Set Nx SHAs
+        uses: nrwl/nx-set-shas@v4
+        with:
+          fallback-sha: 'e2a12bdd38b114c17971fdd29870130d6aa57a63'
+
+      - name: Build, Test, and Publish affected projects
+        run: |
+          pnpm nx affected -t restore
+          pnpm nx affected -t test build publish -c ci
+
+      - name: Create API deployment package
+        run: |
+          if [ -d "dist/apps/jatt-api" ]; then
+            cd dist/apps
+            zip -r ../api.zip jatt-api
+            cd ../..
+          fi
+
+      - name: Upload web artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: web-artifact
+          path: dist/apps/jatt-web/browser
+          retention-days: 1
+          if-no-files-found: ignore
+
+      - name: Upload API artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: api-artifact
+          path: dist/api.zip
+          retention-days: 1
+          if-no-files-found: ignore
+
+  build-ai-service:
+    name: Build AI Service (Docker)
+    needs: [setup, deploy-infra]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ env.AZURE_CLIENT_ID }}
+          tenant-id: ${{ env.AZURE_TENANT_ID }}
+          subscription-id: ${{ env.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Build and push image
+        run: |
+          ACR_NAME="crjattdev"
+          SERVICE_NAME="aca-jatt-dev"
+          IMAGE_TAG="${{ github.sha }}"
+          TIMESTAMP="${{ needs.setup.outputs.timestamp }}"
+
+          az acr login --name $ACR_NAME
+          docker build \
+            --label "org.opencontainers.image.revision=${IMAGE_TAG}" \
+            -t $ACR_NAME.azurecr.io/$SERVICE_NAME:$IMAGE_TAG \
+            -f apps/jatt-ai-service/Dockerfile apps/jatt-ai-service
+          docker push $ACR_NAME.azurecr.io/$SERVICE_NAME:$IMAGE_TAG
+
+          docker tag $ACR_NAME.azurecr.io/$SERVICE_NAME:$IMAGE_TAG $ACR_NAME.azurecr.io/$SERVICE_NAME:$TIMESTAMP
+          docker push $ACR_NAME.azurecr.io/$SERVICE_NAME:$TIMESTAMP
+
+  deploy:
+    name: Deploy Application
+    needs: [setup, deploy-infra, build, build-ai-service]
+    runs-on: ubuntu-latest
+    environment: dev
+    steps:
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ env.AZURE_CLIENT_ID }}
+          tenant-id: ${{ env.AZURE_TENANT_ID }}
+          subscription-id: ${{ env.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Download web artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: web-artifact
+
+      - name: Deploy to Static Web App
+        run: |
+          az staticwebapp tasks execute \
+            --name "stapp-jatt-dev" \
+            --task-name "upload" \
+            --secret VITE_API_URL=${{ vars.FUNCTIONS_URL }}
+
+      - name: Download api artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: api-artifact
+
+      - name: Deploy to Azure Functions
+        run: |
+          az functionapp deployment source config-zip \
+            --resource-group "rg-jatt-dev" \
+            --name "func-jatt-dev" \
+            --src api.zip
+
+      - name: Update Container App
+        run: |
+          ACR_NAME="crjattdev"
+          SERVICE_NAME="aca-jatt-dev"
+          IMAGE_TAG="${{ needs.setup.outputs.timestamp }}"
+
+          az containerapp update \
+            --name $SERVICE_NAME \
+            --resource-group "rg-jatt-dev" \
+            --image $ACR_NAME.azurecr.io/$SERVICE_NAME:$IMAGE_TAG
