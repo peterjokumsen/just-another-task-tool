@@ -39,6 +39,19 @@ resource storageAccount 'Microsoft.Storage/storageAccounts@2024-01-01' existing 
   name: storageAccountName
 }
 
+resource blobService 'Microsoft.Storage/storageAccounts/blobServices@2023-05-01' = {
+  parent: storageAccount
+  name: 'default'
+}
+
+resource container 'Microsoft.Storage/storageAccounts/blobServices/containers@2023-05-01' = {
+  parent: blobService
+  name: '${name}-container'
+  properties: {
+    publicAccess: 'None'
+  }
+}
+
 resource functionsApp 'Microsoft.Web/sites@2024-04-01' = {
   name: name
   location: location
@@ -52,7 +65,7 @@ resource functionsApp 'Microsoft.Web/sites@2024-04-01' = {
       deployment: {
         storage: {
           type: 'BlobContainer'
-          value: storageAccount.properties.primaryEndpoints.blob
+          value: '${storageAccount.properties.primaryEndpoints.blob}${container.name}'
           authentication: {
             type: 'StorageAccountConnectionString'
             storageAccountConnectionStringName: 'AzureWebJobsStorage'
