@@ -117,9 +117,13 @@ jobs:
       - name: Create API deployment package
         run: |
           if [ -d "dist/apps/jatt-api" ]; then
+            echo "Creating API deployment package"
             cd dist/apps
             zip -r ../api.zip jatt-api
             cd ../..
+          else
+            echo "No API deployment package found"
+            ls dist -R
           fi
 
       - name: Upload web artifact
@@ -202,8 +206,8 @@ jobs:
         with:
           azure_static_web_apps_api_token: ${{ steps.swa_token.outputs.SWA_TOKEN }}
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          action: "upload"
-          app_location: "."
+          action: 'upload'
+          app_location: '.'
           skip_app_build: true
 
       - name: Download api artifact
