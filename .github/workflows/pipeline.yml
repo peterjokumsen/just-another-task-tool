@@ -82,6 +82,10 @@ jobs:
   build:
     name: Build and Test
     runs-on: ubuntu-latest
+    outputs:
+      web_artifact_exists: ${{ steps.check_artifacts.outputs.web_exists }}
+      api_artifact_exists: ${{ steps.check_artifacts.outputs.api_exists }}
+      ai_service_affected: ${{ steps.check_artifacts.outputs.ai_affected }}
     steps:
       - uses: actions/checkout@v6
         with:
@@ -116,14 +120,47 @@ jobs:
 
       - name: Create API deployment package
         run: |
-          if [ -d "dist/apps/jatt-api" ]; then
-            echo "Creating API deployment package"
-            cd dist/apps
-            zip -r ../api.zip jatt-api
-            cd ../..
+          # ensure dist exists
+          mkdir -p dist
+          # try dist/apps/jatt-api or apps/jatt-api/bin/Release/net10.0
+          $loc="dist/apps/jatt-api"
+          if [ ! -d "$loc" ]; then
+            echo "$loc not found"
+            $loc="apps/jatt-api/bin/Release/net10.0"
+          fi
+
+          if [ -d "$loc" ]; then
+            echo "Creating API deployment package from $loc"
+            zip -r dist/api.zip $loc
           else
             echo "No API deployment package found"
-            ls dist -R
+          fi
+
+      - name: Check artifacts existence
+        id: check_artifacts
+        run: |
+          if [ -d "dist/apps/jatt-web/browser" ]; then
+            echo "jatt-web artifact found"
+            echo "web_exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "jatt-web artifact not found"
+            echo "web_exists=false" >> $GITHUB_OUTPUT
+          fi
+
+          if [ -f "dist/api.zip" ]; then
+            echo "api artifact found"
+            echo "api_exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "api artifact not found"
+            echo "api_exists=false" >> $GITHUB_OUTPUT
+          fi
+
+          if pnpm nx show projects --affected | grep -q "jatt-ai-service"; then
+            echo "jatt-ai-service affected"
+            echo "ai_affected=true" >> $GITHUB_OUTPUT
+          else
+            echo "jatt-ai-service not affected"
+            echo "ai_affected=false" >> $GITHUB_OUTPUT
           fi
 
       - name: Upload web artifact
@@ -144,7 +181,8 @@ jobs:
 
   build-ai-service:
     name: Build AI Service (Docker)
-    needs: [setup, deploy-infra]
+    needs: [setup, deploy-infra, build]
+    if: needs.build.outputs.ai_service_affected == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -187,11 +225,13 @@ jobs:
           subscription-id: ${{ env.AZURE_SUBSCRIPTION_ID }}
 
       - name: Download web artifact
+        if: needs.build.outputs.web_artifact_exists == 'true'
         uses: actions/download-artifact@v7
         with:
           name: web-artifact
 
       - name: Get SWA Deployment Token
+        if: needs.build.outputs.web_artifact_exists == 'true'
         id: swa_token
         shell: bash
         run: |
@@ -202,6 +242,7 @@ jobs:
           echo "SWA_TOKEN=$TOKEN" >> $GITHUB_OUTPUT
 
       - name: Deploy to Static Web App
+        if: needs.build.outputs.web_artifact_exists == 'true'
         uses: Azure/static-web-apps-deploy@v1
         with:
           azure_static_web_apps_api_token: ${{ steps.swa_token.outputs.SWA_TOKEN }}
@@ -211,11 +252,13 @@ jobs:
           skip_app_build: true
 
       - name: Download api artifact
+        if: needs.build.outputs.api_artifact_exists == 'true'
         uses: actions/download-artifact@v7
         with:
           name: api-artifact
 
       - name: Deploy to Azure Functions
+        if: needs.build.outputs.api_artifact_exists == 'true'
         run: |
           az functionapp deployment source config-zip \
             --resource-group "rg-jatt-dev" \
@@ -223,6 +266,7 @@ jobs:
             --src api.zip
 
       - name: Update Container App
+        if: needs.build.outputs.ai_service_affected == 'true'
         run: |
           ACR_NAME="crjattdev"
           SERVICE_NAME="aca-jatt-dev"
