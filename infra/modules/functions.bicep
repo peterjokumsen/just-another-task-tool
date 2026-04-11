@@ -51,9 +51,11 @@ resource functionsApp 'Microsoft.Web/sites@2024-04-01' = {
     functionAppConfig: {
       deployment: {
         storage: {
-          type: 'Blob'
+          type: 'BlobContainer'
           value: storageAccount.properties.primaryEndpoints.blob
-          authentication: {}
+          authentication: {
+            type: 'SystemAssignedIdentity'
+          }
         }
       }
       runtime: {
@@ -70,10 +72,6 @@ resource functionsApp 'Microsoft.Web/sites@2024-04-01' = {
         {
           name: 'AzureWebJobsStorage'
           value: 'DefaultEndpointsProtocol=https;AccountName=${storageAccountName};EndpointSuffix=${environment().suffixes.storage};AccountKey=${storageAccount.listKeys().keys[0].value}'
-        }
-        {
-          name: 'FUNCTIONS_WORKER_RUNTIME'
-          value: runtime
         }
         /*{
           name: 'CosmosDbConnectionString'
