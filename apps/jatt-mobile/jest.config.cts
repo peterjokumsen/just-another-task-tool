@@ -20,5 +20,8 @@ module.exports = {
       'react-native/jest/assetFileTransformer.js',
     ),
   },
+  transformIgnorePatterns: [
+    'node_modules/(?!(|keystone-v6-utils|@react-native|react-native|react-navigation|@react-navigation/.*|@sentry/react-native|@react-native-community|@nx/react-native))',
+  ],
   coverageDirectory: '../../coverage/apps/jatt-mobile',
 };

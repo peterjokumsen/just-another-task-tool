@@ -1,0 +1,20 @@
+{
+  "name": "jatt-ai-service-tests",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "application",
+  "sourceRoot": "apps/jatt-ai-service-tests",
+  "targets": {
+    "test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "dotnet test",
+        "cwd": "apps/jatt-ai-service-tests"
+      },
+      "configurations": {
+        "ci": {
+          "command": "dotnet test --collect:\"XPlat Code Coverage\" --results-directory ../../coverage/apps/jatt-ai-service-tests"
+        }
+      }
+    }
+  }
+}

@@ -35,7 +35,29 @@
     },
     "@angular/build:unit-test": {
       "cache": true,
-      "inputs": ["default", "^production"]
+      "inputs": ["default", "^production"],
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "configurations": {
+        "ci": {
+          "coverage": true,
+          "watch": false
+        }
+      }
+    },
+    "@nx/jest:jest": {
+      "cache": true,
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "configurations": {
+        "ci": {
+          "ci": true,
+          "codeCoverage": true,
+          "watch": false
+        }
+      }
+    },
+    "test": {
+      "cache": true,
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"]
     }
   },
   "generators": {
@@ -46,7 +68,6 @@
       "unitTestRunner": "vitest-angular"
     }
   },
-  "neverConnectToCloud": true,
   "plugins": [
     {
       "plugin": "@nx/react-native/plugin",
@@ -82,6 +103,7 @@
         "watchDepsTargetName": "watch-deps"
       }
     }
+  "nxCloudId": "69da3930f91fbffd736e45af"
   ],
   "nxCloudId": "69da39a566e62de52c5b0e1e"
 }

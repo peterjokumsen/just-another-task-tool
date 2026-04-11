@@ -1,19 +1,18 @@
 {
-  "name": "jatt-mobile",
+  "name": "jatt-api-tests",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
-  "sourceRoot": "apps/jatt-mobile/src",
   "projectType": "application",
-  "tags": [],
+  "sourceRoot": "apps/jatt-api-tests",
   "targets": {
     "test": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "jest",
-        "cwd": "apps/jatt-mobile"
+        "command": "dotnet test",
+        "cwd": "apps/jatt-api-tests"
       },
       "configurations": {
         "ci": {
-          "command": "jest --coverage --watchAll=false"
+          "command": "dotnet test --collect:\"XPlat Code Coverage\" --results-directory ../../coverage/apps/jatt-api-tests"
         }
       }
     }
