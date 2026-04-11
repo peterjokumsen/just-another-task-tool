@@ -163,10 +163,25 @@ jobs:
             echo "ai_affected=false" >> $GITHUB_OUTPUT
           fi
 
+      - name: Post-test coverage fix
+        run: |
+          if [ -f coverage/apps/jatt-mobile/cobertura-coverage.xml ]; then
+            echo "Fixing coverage for jatt-mobile"
+            sed -i 's/name="main"/name="jatt-mobile"/' coverage/apps/jatt-mobile/cobertura-coverage.xml
+          else
+            echo "No coverage for jatt-mobile"
+          fi
+          if [ -f coverage/jatt-web/cobertura-coverage.xml ]; then
+            echo "Fixing coverage for jatt-web"
+            sed -i 's/name="main"/name="jatt-web"/' coverage/jatt-web/cobertura-coverage.xml
+          else
+            echo "No coverage for jatt-web"
+          fi
+
       - name: Code Coverage Summary
         uses: irongut/CodeCoverageSummary@v1.3.0
         with:
-          filename: coverage/**/*.xml
+          filename: coverage/**/cobertura*.xml
           badge: true
           format: markdown
           output: both
