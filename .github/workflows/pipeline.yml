@@ -53,7 +53,7 @@ jobs:
               --location westus2
 
       - name: Validate Biceps
-        uses: azure/bicep-build@v2
+        uses: azure/bicep-deploy@v2
         with:
           type: deployment
           operation: validate
