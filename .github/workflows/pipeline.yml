@@ -52,6 +52,17 @@ jobs:
               --name "rg-jatt-dev" \
               --location westus2
 
+      - name: Validate Biceps
+        uses: azure/bicep-build@v2
+        with:
+          type: deployment
+          operation: validate
+          scope: resourceGroup
+          resource-group-name: 'rg-jatt-dev'
+          subscription-id: ${{ env.AZURE_SUBSCRIPTION_ID }}
+          template-file: ./infra/main.bicep
+          parameters-file: ./infra/parameters.bicepparam
+
       - name: Create timestamp
         run: echo "TIMESTAMP=$(date +'%Y%m%d_%H%M%S')" >> $GITHUB_ENV
 
@@ -62,9 +73,9 @@ jobs:
           operation: create
           scope: resourceGroup
           resource-group-name: 'rg-jatt-dev'
+          subscription-id: ${{ env.AZURE_SUBSCRIPTION_ID }}
           template-file: ./infra/main.bicep
           parameters-file: ./infra/parameters.bicepparam
-          location: westus2
           name: rg-jatt-dev-${{ env.TIMESTAMP }}
 
   build:
