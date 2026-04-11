@@ -317,6 +317,8 @@ jobs:
           SERVICE_NAME="aca-jatt-dev"
           IMAGE_TAG="${{ needs.setup.outputs.timestamp }}"
 
+          az provider register -n Microsoft.App --wait
+
           az containerapp update \
             --name $SERVICE_NAME \
             --resource-group "rg-jatt-dev" \
