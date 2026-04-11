@@ -124,14 +124,19 @@ jobs:
           mkdir -p dist
           # try dist/apps/jatt-api or apps/jatt-api/bin/Release/net10.0
           loc="dist/apps/jatt-api"
+          rel_path="../.."
           if [ ! -d "$loc" ]; then
             echo "$loc not found"
             loc="apps/jatt-api/bin/Release/net10.0"
+            rel_path="../../../../dist"
           fi
 
           if [ -d "$loc" ]; then
             echo "Creating API deployment package from $loc"
-            zip -r dist/api.zip $loc
+            cd $loc
+            zip -r $rel_path/api.zip .
+            cd $rel_path
+            cd ..
           else
             echo "No API deployment package found"
           fi
