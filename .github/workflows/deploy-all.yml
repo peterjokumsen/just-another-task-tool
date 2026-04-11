@@ -1,0 +1,165 @@
+name: Deploy All
+
+on:
+  workflow_run:
+    workflows: ["Deploy Infrastructure", "Build All"]
+    types: [completed]
+
+permissions:
+  id-token: write
+  contents: read
+  actions: read
+
+env:
+  AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+  AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+  AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+jobs:
+  wait-for-dependencies:
+    name: Wait for Build and Infra
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    outputs:
+      should_run: ${{ steps.check.outputs.should_run }}
+      build_run_id: ${{ steps.check.outputs.build_run_id }}
+    steps:
+      - name: Check prerequisite workflows
+        id: check
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          SHA=${{ github.event.workflow_run.head_sha }}
+          echo "Checking status for SHA: $SHA"
+          
+          # Get conclusion for latest "Deploy Infrastructure" for this SHA
+          INFRA_STATUS=$(gh run list --workflow "Deploy Infrastructure" --commit $SHA --json conclusion -q '.[0].conclusion')
+          
+          # Get conclusion and Run ID for latest "Build All" for this SHA
+          BUILD_DATA=$(gh run list --workflow "Build All" --commit $SHA --json conclusion,databaseId -q '.[0] | "\(.conclusion) \(.databaseId)"')
+          BUILD_STATUS=$(echo $BUILD_DATA | cut -d' ' -f1)
+          BUILD_RUN_ID=$(echo $BUILD_DATA | cut -d' ' -f2)
+          
+          echo "Infra Status: $INFRA_STATUS"
+          echo "Build Status: $BUILD_STATUS"
+          echo "Build Run ID: $BUILD_RUN_ID"
+          
+          if [[ "$INFRA_STATUS" == "success" && "$BUILD_STATUS" == "success" ]]; then
+            echo "should_run=true" >> $GITHUB_OUTPUT
+            echo "build_run_id=$BUILD_RUN_ID" >> $GITHUB_OUTPUT
+          else
+            echo "Prerequisites not met. Skipping."
+            echo "should_run=false" >> $GITHUB_OUTPUT
+          fi
+
+  build-ai-service:
+    name: Build AI Service (Docker)
+    needs: [wait-for-dependencies]
+    if: needs.wait-for-dependencies.outputs.should_run == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ env.AZURE_CLIENT_ID }}
+          tenant-id: ${{ env.AZURE_TENANT_ID }}
+          subscription-id: ${{ env.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Build and push image
+        run: |
+          ACR_NAME="crjattdev"
+          SERVICE_NAME="aca-jatt-dev"
+          IMAGE_TAG="${{ github.event.workflow_run.head_sha }}"
+          
+          az acr login --name $ACR_NAME
+          docker build -t $ACR_NAME.azurecr.io/$SERVICE_NAME:$IMAGE_TAG -f apps/jatt-ai-service/Dockerfile apps/jatt-ai-service
+          docker push $ACR_NAME.azurecr.io/$SERVICE_NAME:$IMAGE_TAG
+          
+          docker tag $ACR_NAME.azurecr.io/$SERVICE_NAME:$IMAGE_TAG $ACR_NAME.azurecr.io/$SERVICE_NAME:latest
+          docker push $ACR_NAME.azurecr.io/$SERVICE_NAME:latest
+
+  deploy-web:
+    name: Deploy Web
+    needs: [wait-for-dependencies]
+    if: needs.wait-for-dependencies.outputs.should_run == 'true'
+    runs-on: ubuntu-latest
+    environment: dev
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: web-artifact
+          run-id: ${{ needs.wait-for-dependencies.outputs.build_run_id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ env.AZURE_CLIENT_ID }}
+          tenant-id: ${{ env.AZURE_TENANT_ID }}
+          subscription-id: ${{ env.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Deploy to Static Web App
+        run: |
+          az staticwebapp tasks execute \
+            --name "stapp-jatt-dev" \
+            --task-name "upload" \
+            --secret VITE_API_URL=${{ vars.FUNCTIONS_URL }}
+
+  deploy-api:
+    name: Deploy API
+    needs: [wait-for-dependencies]
+    if: needs.wait-for-dependencies.outputs.should_run == 'true'
+    runs-on: ubuntu-latest
+    environment: dev
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: api-artifact
+          run-id: ${{ needs.wait-for-dependencies.outputs.build_run_id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ env.AZURE_CLIENT_ID }}
+          tenant-id: ${{ env.AZURE_TENANT_ID }}
+          subscription-id: ${{ env.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Deploy to Azure Functions
+        run: |
+          az functionapp deployment source config-zip \
+            --resource-group "rg-jatt-dev" \
+            --name "func-jatt-dev" \
+            --src api.zip
+
+  deploy-ai-service:
+    name: Deploy AI Service
+    needs: [build-ai-service, wait-for-dependencies]
+    if: needs.wait-for-dependencies.outputs.should_run == 'true'
+    runs-on: ubuntu-latest
+    environment: dev
+    steps:
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ env.AZURE_CLIENT_ID }}
+          tenant-id: ${{ env.AZURE_TENANT_ID }}
+          subscription-id: ${{ env.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Update Container App
+        run: |
+          ACR_NAME="crjattdev"
+          SERVICE_NAME="aca-jatt-dev"
+          IMAGE_TAG="${{ github.event.workflow_run.head_sha }}"
+          
+          az containerapp update \
+            --name $SERVICE_NAME \
+            --resource-group "rg-jatt-dev" \
+            --image $ACR_NAME.azurecr.io/$SERVICE_NAME:$IMAGE_TAG
