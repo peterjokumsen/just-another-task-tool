@@ -123,10 +123,10 @@ jobs:
           # ensure dist exists
           mkdir -p dist
           # try dist/apps/jatt-api or apps/jatt-api/bin/Release/net10.0
-          $loc="dist/apps/jatt-api"
+          loc="dist/apps/jatt-api"
           if [ ! -d "$loc" ]; then
             echo "$loc not found"
-            $loc="apps/jatt-api/bin/Release/net10.0"
+            loc="apps/jatt-api/bin/Release/net10.0"
           fi
 
           if [ -d "$loc" ]; then
