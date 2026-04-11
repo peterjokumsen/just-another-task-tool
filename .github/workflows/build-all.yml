@@ -39,7 +39,9 @@ jobs:
           dotnet-version: '10.0.x'
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: |
+          pnpm install --frozen-lockfile
+          pnpm nx run-many -t restore
 
       - name: Set Nx SHAs
         uses: nrwl/nx-set-shas@v4
