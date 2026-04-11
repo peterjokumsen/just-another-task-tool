@@ -64,7 +64,14 @@
     },
     "test": {
       "executor": "@angular/build:unit-test",
-      "options": {}
+      "outputs": ["{workspaceRoot}/coverage/jatt-web"],
+      "configurations": {
+        "ci": {
+          "coverage": true,
+          "watch": false,
+          "coverageReporters": ["text", "cobertura"]
+        }
+      }
     },
     "serve-static": {
       "continuous": true,

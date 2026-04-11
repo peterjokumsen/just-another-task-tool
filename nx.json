@@ -86,9 +86,16 @@
     "@nx/dotnet",
     {
       "plugin": "@nx/eslint/plugin",
-      "options": { "targetName": "eslint:lint" }
+      "options": {
+        "targetName": "eslint:lint"
+      }
     },
-    { "plugin": "@nx/jest/plugin", "options": { "targetName": "test" } },
+    {
+      "plugin": "@nx/jest/plugin",
+      "options": {
+        "targetName": "test"
+      }
+    },
     {
       "plugin": "@nx/vite/plugin",
       "options": {
