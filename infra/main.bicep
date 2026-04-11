@@ -45,7 +45,7 @@ module functions 'modules/functions.bicep' = {
     // cosmosDbConnectionString: 
     // cosmosDbDatabaseId: cosmosDb.outputs.databaseId
     runtime: 'dotnet-isolated'
-    runtimeVersion: '10'
+    runtimeVersion: '10.0'
   }
 }
 

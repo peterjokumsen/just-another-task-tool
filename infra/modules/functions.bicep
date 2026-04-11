@@ -35,6 +35,10 @@ resource functionsAppServicePlan 'Microsoft.Web/serverfarms@2024-04-01' = {
   }
 }
 
+resource storageAccount 'Microsoft.Storage/storageAccounts@2024-01-01' existing = {
+  name: storageAccountName
+}
+
 resource functionsApp 'Microsoft.Web/sites@2024-04-01' = {
   name: name
   location: location
@@ -44,6 +48,15 @@ resource functionsApp 'Microsoft.Web/sites@2024-04-01' = {
   }
   properties: {
     serverFarmId: functionsAppServicePlan.id
+    functionAppConfig: {
+      deployment: {
+        storage: {
+          type: 'Blob'
+          value: storageAccount.properties.primaryEndpoints.blob
+          authentication: {}
+        }
+      }
+    }
     siteConfig: {
       linuxFxVersion: 'DOTNET|${runtimeVersion}'
       appSettings: [
@@ -75,13 +88,6 @@ resource functionsApp 'Microsoft.Web/sites@2024-04-01' = {
     }
     httpsOnly: true
   }
-  dependsOn: [
-    storageAccount
-  ]
-}
-
-resource storageAccount 'Microsoft.Storage/storageAccounts@2024-01-01' existing = {
-  name: storageAccountName
 }
 
 output id string = functionsApp.id
