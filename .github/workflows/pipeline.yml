@@ -128,7 +128,7 @@ jobs:
           if [ ! -d "$loc" ]; then
             echo "$loc not found"
             loc="apps/jatt-api/bin/Release/net10.0"
-            rel_path="../../../../dist"
+            rel_path="../../../../../dist"
           fi
 
           if [ -d "$loc" ]; then
