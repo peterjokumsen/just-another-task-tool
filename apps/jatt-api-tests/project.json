@@ -4,6 +4,7 @@
   "projectType": "application",
   "sourceRoot": "apps/jatt-api-tests",
   "targets": {
+    "publish": {},
     "test": {
       "executor": "nx:run-commands",
       "options": {

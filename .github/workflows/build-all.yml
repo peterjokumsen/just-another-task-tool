@@ -15,11 +15,14 @@ env:
   NODE_VERSION: '24'
 
 jobs:
-  test-affected:
-    name: Test Affected Projects
+  build-and-test:
+    name: Build and Test Affected Projects
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          filter: tree:0
+          fetch-depth: 0
 
       - name: Install pnpm
         uses: pnpm/action-setup@v4
@@ -30,32 +33,27 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'pnpm'
 
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Test affected projects
-        run: pnpm nx affected:test --configuration=ci --base=origin/main --head=${{ github.sha }}
-
-  build-web:
-    name: Build Web (Angular)
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
         with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'pnpm'
+          dotnet-version: '10.0.x'
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Build Angular Web App
-        run: pnpm nx build jatt-web --configuration=production
+      - name: Set Nx SHAs
+        uses: nrwl/nx-set-shas@v4
+
+      - name: Build, Test, and Publish affected projects
+        run: pnpm nx affected -t test build publish -c ci
+
+      - name: Create API deployment package
+        run: |
+          if [ -d "dist/apps/jatt-api" ]; then
+            cd dist/apps
+            zip -r ../api.zip jatt-api
+            cd ../..
+          fi
 
       - name: Upload web artifact
         uses: actions/upload-artifact@v4
@@ -63,30 +61,7 @@ jobs:
           name: web-artifact
           path: dist/apps/jatt-web/browser
           retention-days: 1
-
-  build-api:
-    name: Build API (Azure Functions)
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: '10.0.x'
-
-      - name: Restore dependencies
-        working-directory: ./apps/jatt-api
-        run: dotnet restore
-
-      - name: Publish Functions
-        working-directory: ./apps/jatt-api
-        run: dotnet publish -c Release -o ../../dist/functions
-
-      - name: Create deployment package
-        run: |
-          cd dist
-          zip -r api.zip functions
+          if-no-files-found: ignore
 
       - name: Upload API artifact
         uses: actions/upload-artifact@v4
@@ -94,32 +69,12 @@ jobs:
           name: api-artifact
           path: dist/api.zip
           retention-days: 1
+          if-no-files-found: ignore
 
-  build-mobile:
-    name: Build Mobile (React Native)
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - name: Upload mobile artifact
+        uses: actions/upload-artifact@v4
         with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'pnpm'
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      # TODO: get android builds working
-      - name: Build React Native (Android)
-        run: pnpm nx build jatt-mobile
-
-      # - name: Upload mobile artifact
-      #   uses: actions/upload-artifact@v4
-      #   with:
-      #     name: mobile-artifact
-      #     path: apps/jatt-mobile/android/app/build/outputs/apk
-      #     retention-days: 1
+          name: mobile-artifact
+          path: apps/jatt-mobile/android/app/build/outputs/apk
+          retention-days: 1
+          if-no-files-found: ignore

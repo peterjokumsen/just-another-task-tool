@@ -23,6 +23,7 @@ jobs:
     outputs:
       should_run: ${{ steps.check.outputs.should_run }}
       build_run_id: ${{ steps.check.outputs.build_run_id }}
+      timestamp: ${{ steps.check.outputs.timestamp }}
     steps:
       - name: Check prerequisite workflows
         id: check
@@ -48,6 +49,7 @@ jobs:
           if [[ "$INFRA_STATUS" == "success" && "$BUILD_STATUS" == "success" ]]; then
             echo "should_run=true" >> $GITHUB_OUTPUT
             echo "build_run_id=$BUILD_RUN_ID" >> $GITHUB_OUTPUT
+            echo "timestamp=$(date +%Y-%m-%d_%H-%M)" >> $GITHUB_OUTPUT
           else
             echo "Prerequisites not met. Skipping."
             echo "should_run=false" >> $GITHUB_OUTPUT
@@ -75,13 +77,17 @@ jobs:
           ACR_NAME="crjattdev"
           SERVICE_NAME="aca-jatt-dev"
           IMAGE_TAG="${{ github.event.workflow_run.head_sha }}"
+          TIMESTAMP="${{ needs.wait-for-dependencies.outputs.timestamp }}"
           
           az acr login --name $ACR_NAME
-          docker build -t $ACR_NAME.azurecr.io/$SERVICE_NAME:$IMAGE_TAG -f apps/jatt-ai-service/Dockerfile apps/jatt-ai-service
+          docker build \
+            --label "org.opencontainers.image.revision=${IMAGE_TAG}" \
+            -t $ACR_NAME.azurecr.io/$SERVICE_NAME:$IMAGE_TAG \
+            -f apps/jatt-ai-service/Dockerfile apps/jatt-ai-service
           docker push $ACR_NAME.azurecr.io/$SERVICE_NAME:$IMAGE_TAG
           
-          docker tag $ACR_NAME.azurecr.io/$SERVICE_NAME:$IMAGE_TAG $ACR_NAME.azurecr.io/$SERVICE_NAME:latest
-          docker push $ACR_NAME.azurecr.io/$SERVICE_NAME:latest
+          docker tag $ACR_NAME.azurecr.io/$SERVICE_NAME:$IMAGE_TAG $ACR_NAME.azurecr.io/$SERVICE_NAME:$TIMESTAMP
+          docker push $ACR_NAME.azurecr.io/$SERVICE_NAME:$TIMESTAMP
 
   deploy-web:
     name: Deploy Web
@@ -157,7 +163,7 @@ jobs:
         run: |
           ACR_NAME="crjattdev"
           SERVICE_NAME="aca-jatt-dev"
-          IMAGE_TAG="${{ github.event.workflow_run.head_sha }}"
+          IMAGE_TAG="${{ needs.wait-for-dependencies.outputs.timestamp }}"
           
           az containerapp update \
             --name $SERVICE_NAME \
