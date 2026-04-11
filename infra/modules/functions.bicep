@@ -54,7 +54,8 @@ resource functionsApp 'Microsoft.Web/sites@2024-04-01' = {
           type: 'BlobContainer'
           value: storageAccount.properties.primaryEndpoints.blob
           authentication: {
-            type: 'SystemAssignedIdentity'
+            type: 'StorageAccountConnectionString'
+            storageAccountConnectionStringName: 'AzureWebJobsStorage'
           }
         }
       }
