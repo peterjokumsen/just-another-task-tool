@@ -81,14 +81,6 @@ resource functionsApp 'Microsoft.Web/sites@2024-04-01' = {
           name: 'CosmosDbDatabaseId'
           value: cosmosDbDatabaseId
         }*/
-        {
-          name: 'WEBSITE_RUN_FROM_PACKAGE'
-          value: '1'
-        }
-        {
-          name: 'WEBSITE_ENABLE_SYNC_UPDATE_SITE'
-          value: 'true'
-        }
       ]
     }
     httpsOnly: true
