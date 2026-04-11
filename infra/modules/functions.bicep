@@ -56,9 +56,16 @@ resource functionsApp 'Microsoft.Web/sites@2024-04-01' = {
           authentication: {}
         }
       }
+      runtime: {
+        name: runtime
+        version: runtimeVersion
+      }
+      scaleAndConcurrency: {
+        instanceMemoryMB: 512
+        maximumInstanceCount: 5
+      }
     }
     siteConfig: {
-      linuxFxVersion: 'DOTNET|${runtimeVersion}'
       appSettings: [
         {
           name: 'AzureWebJobsStorage'
