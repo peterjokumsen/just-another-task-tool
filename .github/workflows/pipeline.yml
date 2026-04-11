@@ -22,6 +22,7 @@ env:
 
 jobs:
   setup:
+    name: Setup
     runs-on: ubuntu-latest
     outputs:
       timestamp: ${{ steps.t.outputs.timestamp }}
@@ -59,7 +60,7 @@ jobs:
         with:
           type: deployment
           operation: create
-          scope: resourcegroup
+          scope: resourceGroup
           resource-group-name: 'rg-jatt-dev'
           template-file: ./infra/main.bicep
           parameters-file: ./infra/parameters.bicepparam
