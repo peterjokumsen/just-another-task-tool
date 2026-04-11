@@ -177,11 +177,12 @@ jobs:
           else
             echo "No coverage for jatt-web"
           fi
+          ls coverage -R
 
       - name: Code Coverage Summary
         uses: irongut/CodeCoverageSummary@v1.3.0
         with:
-          filename: coverage/**/cobertura*.xml
+          filename: coverage/**/*cobertura*.xml
           badge: true
           format: markdown
           output: both
