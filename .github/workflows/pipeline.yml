@@ -187,12 +187,24 @@ jobs:
         with:
           name: web-artifact
 
-      - name: Deploy to Static Web App
+      - name: Get SWA Deployment Token
+        id: swa_token
+        shell: bash
         run: |
-          az staticwebapp tasks execute \
+          TOKEN=$(az staticwebapp secrets list \
             --name "stapp-jatt-dev" \
-            --task-name "upload" \
-            --secret VITE_API_URL=${{ vars.FUNCTIONS_URL }}
+            --resource-group "rg-jatt-dev" \
+            --query "properties.apiKey" -o tsv)
+          echo "SWA_TOKEN=$TOKEN" >> $GITHUB_OUTPUT
+
+      - name: Deploy to Static Web App
+        uses: Azure/static-web-apps-deploy@v1
+        with:
+          azure_static_web_apps_api_token: ${{ steps.swa_token.outputs.SWA_TOKEN }}
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          action: "upload"
+          app_location: "."
+          skip_app_build: true
 
       - name: Download api artifact
         uses: actions/download-artifact@v7
