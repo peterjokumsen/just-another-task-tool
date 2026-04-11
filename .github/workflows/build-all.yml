@@ -39,15 +39,17 @@ jobs:
           dotnet-version: '10.0.x'
 
       - name: Install dependencies
-        run: |
-          pnpm install --frozen-lockfile
-          pnpm nx run-many -t restore
+        run: pnpm install --frozen-lockfile
 
       - name: Set Nx SHAs
         uses: nrwl/nx-set-shas@v4
+        with:
+          fallback-sha: 'e2a12bdd38b114c17971fdd29870130d6aa57a63'
 
       - name: Build, Test, and Publish affected projects
-        run: pnpm nx affected -t test build publish -c ci
+        run: |
+          pnpm nx affected -t restore
+          pnpm nx affected -t test build publish -c ci
 
       - name: Create API deployment package
         run: |
