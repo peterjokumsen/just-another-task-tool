@@ -62,7 +62,7 @@ jobs:
       - name: Validate Biceps
         uses: azure/bicep-deploy@v2
         with:
-          name: Validate Bicep
+          name: validation
           type: deployment
           operation: validate
           scope: resourceGroup
