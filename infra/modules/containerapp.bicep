@@ -19,14 +19,14 @@ param aiServicesEndpoint string
 @description('AI Services resource name')
 param aiServicesName string
 
-resource logAnalytics 'Microsoft.OperationalInsights/workspaces@2022-10-01' = {
-  name: 'log-${name}'
-  location: location
-  properties: {
-    sku: {
-      name: 'PerGB2018'
-    }
-  }
+@description('App Insights connection string')
+param appInsightsConnectionString string = ''
+
+@description('Log Analytics workspace name (from shared workspace)')
+param logAnalyticsWorkspaceName string = ''
+
+resource logAnalytics 'Microsoft.OperationalInsights/workspaces@2022-10-01' existing = {
+  name: logAnalyticsWorkspaceName
 }
 
 resource environment 'Microsoft.App/managedEnvironments@2023-05-01' = {
@@ -84,6 +84,10 @@ resource containerApp 'Microsoft.App/containerApps@2023-05-01' = {
             {
               name: 'AI_SERVICES_KEY'
               secretRef: 'ai-services-key'
+            }
+            {
+              name: 'APPLICATIONINSIGHTS_CONNECTION_STRING'
+              value: appInsightsConnectionString
             }
           ]
           resources: {
