@@ -18,6 +18,14 @@ param timestamp string
 
 var resourcePrefix = '${baseName}-${environment}'
 
+module appInsights 'modules/appinsights.bicep' = {
+  name: 'appinsights-deployment-${timestamp}'
+  params: {
+    name: 'ai-${resourcePrefix}'
+    location: location
+  }
+}
+
 module cosmosDb 'modules/cosmosdb.bicep' = {
   name: 'cosmosdb-deployment-${timestamp}'
   params: {
@@ -42,10 +50,11 @@ module functions 'modules/functions.bicep' = {
     name: 'func-${resourcePrefix}'
     location: location
     storageAccountName: storage.outputs.name
-    // cosmosDbConnectionString: 
+    // cosmosDbConnectionString:
     // cosmosDbDatabaseId: cosmosDb.outputs.databaseId
     runtime: 'dotnet-isolated'
     runtimeVersion: '10.0'
+    appInsightsInstrumentationKey: appInsights.outputs.instrumentationKey
   }
 }
 
@@ -84,10 +93,14 @@ module containerApp 'modules/containerapp.bicep' = {
     registryLoginServer: registry.outputs.loginServer
     aiServicesEndpoint: aiServices.outputs.endpoint
     aiServicesName: aiServices.outputs.name
+    appInsightsConnectionString: appInsights.outputs.connectionString
+    logAnalyticsWorkspaceName: appInsights.outputs.workspaceName
   }
 }
 
 output resourceGroup string = resourceGroup().name
+output appInsightsInstrumentationKey string = appInsights.outputs.instrumentationKey
+output appInsightsConnectionString string = appInsights.outputs.connectionString
 output cosmosDbName string = cosmosDb.outputs.name
 output functionsName string = functions.outputs.name
 output functionsUrl string = functions.outputs.url

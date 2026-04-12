@@ -22,6 +22,9 @@ param runtime string = 'dotnet-isolated'
 @description('Runtime version')
 param runtimeVersion string = '10.0'
 
+@description('App Insights instrumentation key')
+param appInsightsInstrumentationKey string = ''
+
 resource functionsAppServicePlan 'Microsoft.Web/serverfarms@2024-04-01' = {
   name: '${name}-asp'
   location: location
@@ -86,6 +89,10 @@ resource functionsApp 'Microsoft.Web/sites@2024-04-01' = {
         {
           name: 'AzureWebJobsStorage'
           value: 'DefaultEndpointsProtocol=https;AccountName=${storageAccountName};EndpointSuffix=${environment().suffixes.storage};AccountKey=${storageAccount.listKeys().keys[0].value}'
+        }
+        {
+          name: 'APPINSIGHTS_INSTRUMENTATIONKEY'
+          value: appInsightsInstrumentationKey
         }
         /*{
           name: 'CosmosDbConnectionString'
