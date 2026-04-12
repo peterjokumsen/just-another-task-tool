@@ -177,6 +177,7 @@ jobs:
           fi
 
       - name: Post-test coverage fix
+        id: post_coverage_fix
         run: |
           if [ -f coverage/apps/jatt-mobile/cobertura-coverage.xml ]; then
             echo "Fixing coverage for jatt-mobile"
@@ -193,13 +194,16 @@ jobs:
 
           if [ -d coverage ]; then
             echo "Coverage reports found:"
+            echo "HAS_COVERAGE=true" >> $GITHUB_OUTPUT
             find coverage -type f -name "*.xml"
           else
             echo "No coverage reports found"
+            echo "HAS_COVERAGE=false" >> $GITHUB_OUTPUT
           fi
 
       - name: Code Coverage Summary
         uses: irongut/CodeCoverageSummary@v1.3.0
+        if: steps.post_coverage_fix.outputs.HAS_COVERAGE == 'true'
         with:
           filename: coverage/**/*cobertura*.xml
           badge: true
