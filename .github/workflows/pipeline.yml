@@ -7,6 +7,12 @@ on:
     paths-ignore:
       - 'docs/**'
       - '*.md'
+  pull_request:
+    branches:
+      - main
+    paths-ignore:
+      - 'docs/**'
+      - '*.md'
 
 permissions:
   id-token: write
@@ -69,6 +75,7 @@ jobs:
 
       - name: Deploy Infrastructure
         uses: azure/bicep-deploy@v2
+        if: github.ref == 'refs/heads/main'
         with:
           type: deployment
           operation: create
@@ -227,7 +234,7 @@ jobs:
   build-ai-service:
     name: Build AI Service (Docker)
     needs: [setup, deploy-infra, build]
-    if: needs.build.outputs.ai_service_affected == 'true'
+    if: needs.build.outputs.ai_service_affected == 'true' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -260,6 +267,7 @@ jobs:
     name: Deploy Container App
     needs: [setup, deploy-infra, build, build-ai-service]
     runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
     environment: dev
     steps:
       - name: Azure Login
@@ -287,6 +295,7 @@ jobs:
     name: Deploy SWA and API
     needs: [setup, deploy-infra, build]
     runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
     environment: dev
     steps:
       - name: Azure Login
