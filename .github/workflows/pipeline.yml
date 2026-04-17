@@ -60,6 +60,7 @@ jobs:
 
       - name: Create Resource Group
         uses: azure/cli@v3
+        if: github.ref == 'refs/heads/main'
         with:
           inlineScript: |
             az group create \
@@ -68,6 +69,7 @@ jobs:
 
       - name: Validate Biceps
         uses: azure/bicep-deploy@v2
+        if: github.ref != 'refs/heads/main'
         with:
           name: validation
           type: deployment
