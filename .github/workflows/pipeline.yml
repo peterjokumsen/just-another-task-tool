@@ -67,6 +67,15 @@ jobs:
               --name "rg-jatt-dev" \
               --location westus2
 
+      - name: Create PR Resource Group
+        uses: azure/cli@v3
+        if: github.ref != 'refs/heads/main'
+        with:
+          inlineScript: |
+            az group create \
+              --name "rg-jatt-dev-pr" \
+              --location westus2
+
       - name: Validate Biceps
         uses: azure/bicep-deploy@v2
         if: github.ref != 'refs/heads/main'
@@ -75,7 +84,7 @@ jobs:
           type: deployment
           operation: validate
           scope: resourceGroup
-          resource-group-name: 'rg-jatt-dev'
+          resource-group-name: 'rg-jatt-dev-pr'
           subscription-id: ${{ env.AZURE_SUBSCRIPTION_ID }}
           template-file: ./infra/main.bicep
           parameters-file: ./infra/parameters.bicepparam
