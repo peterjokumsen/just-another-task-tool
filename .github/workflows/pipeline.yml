@@ -87,7 +87,7 @@ jobs:
           resource-group-name: 'rg-jatt-dev-pr'
           subscription-id: ${{ env.AZURE_SUBSCRIPTION_ID }}
           template-file: ./infra/main.bicep
-          parameters-file: ./infra/parameters.bicepparam
+          parameters-file: ./infra/parameters-pr.bicepparam
 
       - name: Create timestamp
         run: echo "TIMESTAMP=$(date +'%Y%m%d_%H%M%S')" >> $GITHUB_ENV
