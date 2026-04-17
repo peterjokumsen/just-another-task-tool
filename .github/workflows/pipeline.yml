@@ -13,6 +13,13 @@ on:
     paths-ignore:
       - 'docs/**'
       - '*.md'
+  workflow_dispatch:
+    inputs:
+      run_all:
+        description: 'Build and publish all projects (not just affected)'
+        required: false
+        default: false
+        type: boolean
 
 permissions:
   id-token: write
@@ -53,20 +60,31 @@ jobs:
 
       - name: Create Resource Group
         uses: azure/cli@v3
+        if: github.ref == 'refs/heads/main'
         with:
           inlineScript: |
             az group create \
               --name "rg-jatt-dev" \
               --location westus2
 
+      - name: Create PR Resource Group
+        uses: azure/cli@v3
+        if: github.ref != 'refs/heads/main'
+        with:
+          inlineScript: |
+            az group create \
+              --name "rg-jatt-dev-pr" \
+              --location westus2
+
       - name: Validate Biceps
         uses: azure/bicep-deploy@v2
+        if: github.ref != 'refs/heads/main'
         with:
           name: validation
           type: deployment
           operation: validate
           scope: resourceGroup
-          resource-group-name: 'rg-jatt-dev'
+          resource-group-name: 'rg-jatt-dev-pr'
           subscription-id: ${{ env.AZURE_SUBSCRIPTION_ID }}
           template-file: ./infra/main.bicep
           parameters-file: ./infra/parameters.bicepparam
@@ -117,14 +135,22 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Set Nx SHAs
+        if: github.event_name != 'workflow_dispatch' || !inputs.run_all
         uses: nrwl/nx-set-shas@v5
         with:
           fallback-sha: 'e2a12bdd38b114c17971fdd29870130d6aa57a63'
 
       - name: Build, Test, and Publish affected projects
+        if: github.event_name != 'workflow_dispatch' || !inputs.run_all
         run: |
           pnpm nx affected -t restore
           pnpm nx affected -t test build publish -c ci
+
+      - name: Build, Test, and Publish all projects
+        if: github.event_name != 'workflow_dispatch' || !inputs.run_all
+        run: |
+          pnpm nx run-many -t restore
+          pnpm nx run-many -t test build publish -c ci
 
       - name: Create API deployment package
         run: |
@@ -168,7 +194,10 @@ jobs:
             echo "api_exists=false" >> $GITHUB_OUTPUT
           fi
 
-          if pnpm nx show projects --affected | grep -q "jatt-ai-service"; then
+          if [ "${{ github.event_name }}" == "workflow_dispatch" ] && [ "${{ inputs.run_all }}" == "true" ]; then
+            echo "Running all, will build ai-service"
+            echo "ai_affected=true" >> $GITHUB_OUTPUT
+          elif pnpm nx show projects --affected 2>/dev/null | grep -q "jatt-ai-service"; then
             echo "jatt-ai-service affected"
             echo "ai_affected=true" >> $GITHUB_OUTPUT
           else

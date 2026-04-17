@@ -3,6 +3,8 @@ name: Clean up Azure
 
 on:
   workflow_dispatch:
+  schedule:
+    - cron: '0 0 * * 0' # Every Sunday at midnight
 
 # These permissions are required for OIDC token generation
 permissions:
@@ -13,8 +15,9 @@ env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
-  deploy:
-    if: github.ref == 'refs/heads/main'
+  clean-up-dev:
+    name: Clean up Dev Resource Group
+    if: github.ref == 'refs/heads/main' && github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     steps:
       # Check out the repository code
@@ -34,4 +37,27 @@ jobs:
           inlineScript: |
             az group delete \
               --name "rg-jatt-dev" \
+              --yes
+
+  clean-up-pr:
+    name: Clean up PR Resource Group
+    runs-on: ubuntu-latest
+    steps:
+      # Check out the repository code
+      - uses: actions/checkout@v6
+
+      # Authenticate to Azure using OIDC
+      - name: Azure Login
+        uses: azure/login@v3
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Delete PR Resource Group
+        uses: azure/cli@v3
+        with:
+          inlineScript: |
+            az group delete \
+              --name "rg-jatt-dev-pr" \
               --yes
