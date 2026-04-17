@@ -1,0 +1,67 @@
+<div class="landing-container">
+  <nav>
+    <div class="logo">
+      <span>JATT</span>
+    </div>
+    <div class="nav-links">
+      <a href="#features" class="nav-link">Features</a>
+      <a href="#" class="nav-link">Web App</a>
+      <a routerLink="/login" class="btn-primary">Get Started</a>
+    </div>
+  </nav>
+
+  <header class="hero">
+    <div class="hero-content">
+      <h1>Master Your Productivity. Seamlessly.</h1>
+      <p class="hero-subtitle">
+        Effortless task management with JATT. Organize, collaborate, and achieve
+        more every day with our AI-powered tool.
+      </p>
+      <div class="hero-btns">
+        <a routerLink="/signup" class="btn-primary">Start for Free</a>
+        <a href="#features" class="btn-secondary">Explore Features</a>
+      </div>
+    </div>
+    <div class="hero-image">
+      <img src="images/hero.png" alt="JATT App Interface" />
+    </div>
+  </header>
+
+  <section id="features" class="features">
+    @for (feature of features; track feature.title) {
+      <div class="feature-card">
+        <span class="feature-icon">{{ feature.icon }}</span>
+        <h3>{{ feature.title }}</h3>
+        <p>{{ feature.description }}</p>
+      </div>
+    }
+  </section>
+
+  <section class="app-showcase">
+    <h2>Available on all your devices.</h2>
+    <p class="hero-subtitle" style="margin: 0 auto">
+      Download the mobile app or use our web application to stay on top of your
+      tasks wherever you are.
+    </p>
+    <div class="app-grid">
+      <a href="#" class="app-store-btn">
+        <img
+          src="https://upload.wikimedia.org/wikipedia/commons/3/3c/Download_on_the_App_Store_Badge.svg"
+          alt="App Store"
+          width="120"
+        />
+      </a>
+      <a href="#" class="app-store-btn">
+        <img
+          src="https://upload.wikimedia.org/wikipedia/commons/7/78/Google_Play_Store_badge_EN.svg"
+          alt="Google Play"
+          width="135"
+        />
+      </a>
+    </div>
+  </section>
+
+  <footer>
+    <p>&copy; 2026 JATT - Just Another Task Tool. All rights reserved.</p>
+  </footer>
+</div>

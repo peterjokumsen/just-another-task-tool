@@ -1,4 +1,21 @@
 {
-  "name": "JattMobile",
-  "displayName": "JATT"
+  "expo": {
+    "name": "JATT",
+    "slug": "jatt-mobile",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "assetBundlePatterns": ["**/*"],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.peterjokumsen.jatt"
+    },
+    "android": {
+      "package": "com.peterjokumsen.jatt"
+    },
+    "web": {
+      "bundler": "metro"
+    }
+  }
 }

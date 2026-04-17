@@ -1,4 +1,4 @@
-import { AppRegistry } from 'react-native';
+import { registerRootComponent } from 'expo';
 import App from './app/App';
 
-AppRegistry.registerComponent('JattMobile', () => App);
+registerRootComponent(App);
