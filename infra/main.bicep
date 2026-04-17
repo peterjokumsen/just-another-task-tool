@@ -3,8 +3,8 @@ targetScope = 'resourceGroup'
 @description('Base name for all resources')
 param baseName string = 'jatt'
 
-@description('Environment (dev, staging, prod)')
-@allowed(['dev', 'staging', 'prod'])
+@description('Environment (pr, dev, staging, prod)')
+@allowed(['pr', 'dev', 'staging', 'prod'])
 param environment string = 'dev'
 
 @description('Azure region for resources')
@@ -16,12 +16,12 @@ param enableFreeTier bool = true
 @description('Timestamp of the current deployment')
 param timestamp string
 
-var resourcePrefix = '${baseName}-${environment}'
+var resourceSuffix = '${baseName}-${environment}'
 
 module appInsights 'modules/appinsights.bicep' = {
   name: 'appinsights-deployment-${timestamp}'
   params: {
-    name: 'ai-${resourcePrefix}'
+    name: 'ai-${resourceSuffix}'
     location: location
   }
 }
@@ -29,7 +29,7 @@ module appInsights 'modules/appinsights.bicep' = {
 module cosmosDb 'modules/cosmosdb.bicep' = {
   name: 'cosmosdb-deployment-${timestamp}'
   params: {
-    name: 'cosmos-${resourcePrefix}'
+    name: 'cosmos-${resourceSuffix}'
     location: location
     enableFreeTier: enableFreeTier
     databaseName: 'jatt-db'
@@ -39,7 +39,7 @@ module cosmosDb 'modules/cosmosdb.bicep' = {
 module storage 'modules/storage.bicep' = {
   name: 'storage-deployment-${timestamp}'
   params: {
-    name: 'st${replace(resourcePrefix, '-', '')}'
+    name: 'st${replace(resourceSuffix, '-', '')}'
     location: location
   }
 }
@@ -47,7 +47,7 @@ module storage 'modules/storage.bicep' = {
 module functions 'modules/functions.bicep' = {
   name: 'functions-deployment-${timestamp}'
   params: {
-    name: 'func-${resourcePrefix}'
+    name: 'func-${resourceSuffix}'
     location: location
     storageAccountName: storage.outputs.name
     // cosmosDbConnectionString:
@@ -61,7 +61,7 @@ module functions 'modules/functions.bicep' = {
 module staticWebApp 'modules/staticwebapp.bicep' = {
   name: 'staticwebapp-deployment-${timestamp}'
   params: {
-    name: 'stapp-${resourcePrefix}'
+    name: 'stapp-${resourceSuffix}'
     location: location
   }
 }
@@ -69,7 +69,7 @@ module staticWebApp 'modules/staticwebapp.bicep' = {
 module registry 'modules/registry.bicep' = {
   name: 'registry-deployment-${timestamp}'
   params: {
-    name: 'cr${replace(resourcePrefix, '-', '')}'
+    name: 'cr${replace(resourceSuffix, '-', '')}'
     location: location
   }
 }
@@ -77,7 +77,7 @@ module registry 'modules/registry.bicep' = {
 module aiServices 'modules/aiservices.bicep' = {
   name: 'aiservices-deployment-${timestamp}'
   params: {
-    name: 'ai-${resourcePrefix}'
+    name: 'ai-${resourceSuffix}'
     location: location
     sku: 'S0'
   }
@@ -86,8 +86,8 @@ module aiServices 'modules/aiservices.bicep' = {
 module containerApp 'modules/containerapp.bicep' = {
   name: 'containerapp-deployment-${timestamp}'
   params: {
-    name: 'aca-${resourcePrefix}'
-    environmentName: 'cae-${resourcePrefix}'
+    name: 'aca-${resourceSuffix}'
+    environmentName: 'cae-${resourceSuffix}'
     location: location
     registryName: registry.outputs.name
     registryLoginServer: registry.outputs.loginServer
