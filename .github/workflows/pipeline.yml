@@ -15,6 +15,11 @@ on:
       - '*.md'
   workflow_dispatch:
     inputs:
+      build_mobile:
+        description: 'Build jatt-mobile'
+        required: false
+        default: false
+        type: boolean
       run_all:
         description: 'Build and publish all projects (not just affected)'
         required: false
@@ -135,22 +140,32 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Set Nx SHAs
-        if: github.event_name != 'workflow_dispatch' || !inputs.run_all
+        if: !inputs.run_all
         uses: nrwl/nx-set-shas@v5
         with:
           fallback-sha: 'e2a12bdd38b114c17971fdd29870130d6aa57a63'
 
       - name: Build, Test, and Publish affected projects
-        if: github.event_name != 'workflow_dispatch' || !inputs.run_all
+        if: !inputs.run_all
         run: |
           pnpm nx affected -t restore
-          pnpm nx affected -t test build publish -c ci
+          args=("test" "build" "publish" "-c" "ci")
+          if [ "${{ inputs.build_mobile }}" != "true" ]; then
+            echo "Excluding jatt-mobile"
+            args+=("--exclude" "jatt-mobile")
+          fi
+          pnpm nx affected -t "${args[@]}"
 
       - name: Build, Test, and Publish all projects
-        if: github.event_name != 'workflow_dispatch' || !inputs.run_all
+        if: inputs.run_all
         run: |
           pnpm nx run-many -t restore
-          pnpm nx run-many -t test build publish -c ci
+          args=("test" "build" "publish" "-c" "ci")
+          if [ "${{ inputs.build_mobile }}" != "true" ]; then
+            echo "Excluding jatt-mobile"
+            args+=("--exclude" "jatt-mobile")
+          fi
+          pnpm nx run-many -t "${args[@]}"
 
       - name: Create API deployment package
         run: |
