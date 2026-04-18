@@ -13,21 +13,21 @@
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "assetBundlePatterns": ["**/*"],
-    "icon": "./assets/icon.png",
+    "icon": "./assets/icon.jpg",
     "splash": {
-      "image": "./assets/splash.png",
+      "image": "./assets/splash.jpg",
       "resizeMode": "contain",
       "backgroundColor": "#0b0e14"
     },
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.peterjokumsen.jatt",
-      "icon": "./assets/icon.png"
+      "icon": "./assets/icon.jpg"
     },
     "android": {
       "package": "com.peterjokumsen.jatt",
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
+        "foregroundImage": "./assets/adaptive-icon.jpg",
         "backgroundColor": "#a855f7"
       }
     },
