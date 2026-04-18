@@ -20,7 +20,7 @@ export const BASE_TOKENS = {
     xxl: '48px',
   },
   typography: {
-    fontFamily: "'Inter', sans-serif",
+    fontFamily: "'Fira Code', monospace",
     fontSizeBase: '16px',
     fontWeightRegular: '400',
     fontWeightMedium: '500',

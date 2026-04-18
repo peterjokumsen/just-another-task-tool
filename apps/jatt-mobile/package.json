@@ -10,5 +10,6 @@
     "@testing-library/react-native": "*",
     "react-test-renderer": "*",
     "metro-config": "*"
-  }
+  },
+  "devDependencies": {}
 }

@@ -21,7 +21,7 @@ module.exports = {
     ),
   },
   transformIgnorePatterns: [
-    'node_modules/(?!(|keystone-v6-utils|@react-native|react-native|react-navigation|@react-navigation/.*|@sentry/react-native|@react-native-community|@nx/react-native))',
+    'node_modules/(?!(|keystone-v6-utils|@react-native|react-native|react-navigation|@react-navigation/.*|@sentry/react-native|@react-native-community|@nx/react-native|expo-font|expo-splash-screen|@expo-google-fonts/.*))',
   ],
   coverageDirectory: '../../coverage/apps/jatt-mobile',
   coverageReporters: ['text', 'cobertura'],
