@@ -1,7 +1,13 @@
 {
   "expo": {
+    "extra": {
+      "eas": {
+        "projectId": "6c362767-d2bf-43d4-b902-db49ccf50c29"
+      }
+    },
+    "owner": "pj-org",
+    "slug": "just-another-task-tool",
     "name": "JATT",
-    "slug": "jatt-mobile",
     "version": "1.0.0",
     "orientation": "portrait",
     "userInterfaceStyle": "automatic",
