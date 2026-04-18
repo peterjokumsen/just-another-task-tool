@@ -2,7 +2,8 @@
 body {
   margin: 0;
   padding: 0;
-  font-family: var(--jatt-font-family, 'Inter', sans-serif);
+  font-family: var(--jatt-typography-font-family, "'Fira Code', monospace");
+  font-variant-ligatures: contextual;
   color: var(--jatt-text-primary);
   background-color: var(--jatt-background);
 }

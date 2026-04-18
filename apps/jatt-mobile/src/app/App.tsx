@@ -10,8 +10,22 @@ import {
   TouchableOpacity,
   useColorScheme,
   Dimensions,
+  Platform,
 } from 'react-native';
-import Svg, { Path, Defs, LinearGradient as SvgGradient, Stop } from 'react-native-svg';
+import * as SplashScreen from 'expo-splash-screen';
+import {
+  useFonts,
+  FiraCode_400Regular,
+  FiraCode_500Medium,
+  FiraCode_600SemiBold,
+  FiraCode_700Bold,
+} from '@expo-google-fonts/fira-code';
+import Svg, {
+  Path,
+  Defs,
+  LinearGradient as SvgGradient,
+  Stop,
+} from 'react-native-svg';
 import {
   LIGHT_THEME,
   DARK_THEME,
@@ -20,41 +34,65 @@ import {
 
 const { width } = Dimensions.get('window');
 
+SplashScreen.preventAutoHideAsync();
+
 type Screen = 'landing' | 'login' | 'signup';
 
 const FEATURES = [
   {
     title: 'AI-Powered Tagging',
-    description: 'Automatically categorize your tasks using advanced AI language models.',
+    description:
+      'Automatically categorize your tasks using advanced AI language models.',
     icon: '🧠',
   },
   {
     title: 'Smart Breakdowns',
-    description: 'Turn complex projects into manageable checklists with a single click.',
+    description:
+      'Turn complex projects into manageable checklists with a single click.',
     icon: '⚡',
   },
   {
     title: 'Seamless Sync',
-    description: 'Switch between web and mobile effortlessly with real-time synchronization.',
+    description:
+      'Switch between web and mobile effortlessly with real-time synchronization.',
     icon: '🔄',
   },
 ];
 
 export const App = () => {
+  const [fontsLoaded] = useFonts({
+    FiraCode_400Regular,
+    FiraCode_500Medium,
+    FiraCode_600SemiBold,
+    FiraCode_700Bold,
+  });
+
   const colorScheme = useColorScheme();
   const theme = colorScheme === 'dark' ? DARK_THEME : LIGHT_THEME;
   const [currentScreen, setCurrentScreen] = useState<Screen>('landing');
+
+  React.useEffect(() => {
+    if (fontsLoaded) {
+      SplashScreen.hideAsync();
+    }
+  }, [fontsLoaded]);
+
+  if (!fontsLoaded) {
+    return null;
+  }
 
   const renderHeader = () => (
     <View style={styles.nav}>
       <TouchableOpacity onPress={() => setCurrentScreen('landing')}>
         <Text style={styles.logoText}>JATT</Text>
       </TouchableOpacity>
-      <TouchableOpacity 
+      <TouchableOpacity
         style={styles.loginBtn}
         onPress={() => setCurrentScreen('login')}
       >
-        <Text style={[styles.loginText, { color: theme.colors.textSecondary }]}>Login</Text>
+        <Text style={[styles.loginText, { color: theme.colors.textSecondary }]}>
+          Login
+        </Text>
       </TouchableOpacity>
     </View>
   );
@@ -62,17 +100,20 @@ export const App = () => {
   const renderLanding = () => (
     <ScrollView contentContainerStyle={styles.scrollContent}>
       <View style={styles.hero}>
-        <Text 
+        <Text
           testID="heading"
           style={[styles.heroTitle, { color: theme.colors.textPrimary }]}
         >
           Master Your Productivity.{'\n'}
           <Text style={{ color: theme.colors.primary }}>Seamlessly.</Text>
         </Text>
-        <Text style={[styles.heroSubtitle, { color: theme.colors.textSecondary }]}>
-          Effortless task management with JATT. Organize, collaborate, and achieve more every day with our AI-powered tool.
+        <Text
+          style={[styles.heroSubtitle, { color: theme.colors.textSecondary }]}
+        >
+          Effortless task management with JATT. Organize, collaborate, and
+          achieve more every day with our AI-powered tool.
         </Text>
-        <TouchableOpacity 
+        <TouchableOpacity
           style={styles.btnPrimary}
           onPress={() => setCurrentScreen('signup')}
         >
@@ -82,16 +123,38 @@ export const App = () => {
 
       <View style={styles.featuresSection}>
         {FEATURES.map((feature, idx) => (
-          <View key={idx} style={[styles.featureCard, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}>
+          <View
+            key={idx}
+            style={[
+              styles.featureCard,
+              {
+                backgroundColor: theme.colors.surface,
+                borderColor: theme.colors.border,
+              },
+            ]}
+          >
             <Text style={styles.featureIcon}>{feature.icon}</Text>
-            <Text style={[styles.featureTitle, { color: theme.colors.textPrimary }]}>{feature.title}</Text>
-            <Text style={[styles.featureDescription, { color: theme.colors.textSecondary }]}>{feature.description}</Text>
+            <Text
+              style={[styles.featureTitle, { color: theme.colors.textPrimary }]}
+            >
+              {feature.title}
+            </Text>
+            <Text
+              style={[
+                styles.featureDescription,
+                { color: theme.colors.textSecondary },
+              ]}
+            >
+              {feature.description}
+            </Text>
           </View>
         ))}
       </View>
 
       <View style={styles.footer}>
-        <Text style={[styles.footerText, { color: theme.colors.textSecondary }]}>
+        <Text
+          style={[styles.footerText, { color: theme.colors.textSecondary }]}
+        >
           © 2026 JATT - Just Another Task Tool.{'\n'}All rights reserved.
         </Text>
       </View>
@@ -100,24 +163,40 @@ export const App = () => {
 
   const renderPlaceholder = (type: 'login' | 'signup') => (
     <View style={styles.placeholderContainer}>
-      <Text style={[styles.placeholderTitle, { color: theme.colors.textPrimary }]}>
+      <Text
+        style={[styles.placeholderTitle, { color: theme.colors.textPrimary }]}
+      >
         {type === 'login' ? 'Welcome Back' : 'Join JATT'}
       </Text>
-      <Text style={[styles.placeholderSubtitle, { color: theme.colors.textSecondary }]}>
-        This is a placeholder for the {type} screen. Authenticate seamlessly on all your devices.
+      <Text
+        style={[
+          styles.placeholderSubtitle,
+          { color: theme.colors.textSecondary },
+        ]}
+      >
+        This is a placeholder for the {type} screen. Authenticate seamlessly on
+        all your devices.
       </Text>
-      <TouchableOpacity 
+      <TouchableOpacity
         style={styles.btnSecondary}
         onPress={() => setCurrentScreen('landing')}
       >
-        <Text style={[styles.btnSecondaryText, { color: theme.colors.textPrimary }]}>Back to Home</Text>
+        <Text
+          style={[styles.btnSecondaryText, { color: theme.colors.textPrimary }]}
+        >
+          Back to Home
+        </Text>
       </TouchableOpacity>
     </View>
   );
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]}>
-      <StatusBar barStyle={colorScheme === 'dark' ? 'light-content' : 'dark-content'} />
+    <SafeAreaView
+      style={[styles.container, { backgroundColor: theme.colors.background }]}
+    >
+      <StatusBar
+        barStyle={colorScheme === 'dark' ? 'light-content' : 'dark-content'}
+      />
       {renderHeader()}
       {currentScreen === 'landing' && renderLanding()}
       {currentScreen === 'login' && renderPlaceholder('login')}
@@ -142,6 +221,7 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     letterSpacing: -1,
     color: '#a855f7', // Static primary for logo brand consistency
+    fontFamily: 'FiraCode_700Bold',
   },
   loginBtn: {
     padding: 8,
@@ -149,6 +229,7 @@ const styles = StyleSheet.create({
   loginText: {
     fontSize: 16,
     fontWeight: '600',
+    fontFamily: 'FiraCode_600SemiBold',
   },
   scrollContent: {
     paddingHorizontal: 24,
@@ -164,12 +245,14 @@ const styles = StyleSheet.create({
     lineHeight: 48,
     letterSpacing: -1.5,
     marginBottom: 16,
+    fontFamily: 'FiraCode_700Bold',
   },
   heroSubtitle: {
     fontSize: 18,
     lineHeight: 28,
     marginBottom: 32,
     maxWidth: '90%',
+    fontFamily: 'FiraCode_400Regular',
   },
   btnPrimary: {
     backgroundColor: '#a855f7',
@@ -186,6 +269,7 @@ const styles = StyleSheet.create({
     color: '#ffffff',
     fontSize: 18,
     fontWeight: '700',
+    fontFamily: 'FiraCode_700Bold',
   },
   featuresSection: {
     marginTop: 24,
@@ -208,10 +292,12 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: '700',
     marginBottom: 8,
+    fontFamily: 'FiraCode_700Bold',
   },
   featureDescription: {
     fontSize: 16,
     lineHeight: 24,
+    fontFamily: 'FiraCode_400Regular',
   },
   footer: {
     marginTop: 48,
@@ -224,6 +310,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontSize: 14,
     lineHeight: 20,
+    fontFamily: 'FiraCode_400Regular',
   },
   placeholderContainer: {
     flex: 1,
@@ -236,12 +323,14 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     marginBottom: 16,
     textAlign: 'center',
+    fontFamily: 'FiraCode_700Bold',
   },
   placeholderSubtitle: {
     fontSize: 18,
     lineHeight: 28,
     textAlign: 'center',
     marginBottom: 32,
+    fontFamily: 'FiraCode_400Regular',
   },
   btnSecondary: {
     paddingVertical: 14,
@@ -253,6 +342,7 @@ const styles = StyleSheet.create({
   btnSecondaryText: {
     fontSize: 16,
     fontWeight: '600',
+    fontFamily: 'FiraCode_600SemiBold',
   },
 });
 

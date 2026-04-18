@@ -1,4 +1,4 @@
-import { Injectable, signal, effect } from '@angular/core';
+import { Injectable, signal, effect, inject, InjectionToken, DOCUMENT } from '@angular/core';
 import {
   DARK_THEME,
   LIGHT_THEME,
@@ -6,10 +6,17 @@ import {
   ThemeTokens,
 } from '@just-another-task-tool/shared-styles';
 
+export const THEMES = new InjectionToken<{ light: ThemeTokens, dark: ThemeTokens }>('THEMES');
+
 @Injectable({
   providedIn: 'root',
 })
 export class ThemeService {
+  private document = inject(DOCUMENT);
+  private themes = inject(THEMES, { optional: true }) ?? {
+    light: LIGHT_THEME,
+    dark: DARK_THEME,
+  };
   private theme = signal<'light' | 'dark'>(this.getInitialTheme());
 
   constructor() {
@@ -38,7 +45,7 @@ export class ThemeService {
   }
 
   private applyTheme(tokens: ThemeTokens) {
-    const root = document.documentElement;
+    const root = this.document.documentElement;
 
     // Apply colors
     Object.entries(tokens.colors).forEach(([key, value]) => {
@@ -49,6 +56,10 @@ export class ThemeService {
     // Apply base tokens (spacing, etc)
     Object.entries(BASE_TOKENS.spacing).forEach(([key, value]) => {
       root.style.setProperty(`--jatt-spacing-${key}`, value);
+    });
+
+    Object.entries(BASE_TOKENS.typography).forEach(([key, value]) => {
+      root.style.setProperty(`--jatt-typography-${key.replace(/([A-Z])/g, '-$1').toLowerCase()}`, value);
     });
   }
 }
