@@ -16,6 +16,33 @@
           "command": "jest --coverage --watchAll=false"
         }
       }
+    },
+    "start": {
+      "executor": "@nx/expo:start",
+      "options": {}
+    },
+    "run-ios": {
+      "executor": "@nx/expo:run",
+      "options": {
+        "platform": "ios"
+      }
+    },
+    "run-android": {
+      "executor": "@nx/expo:run",
+      "options": {
+        "platform": "android"
+      }
+    },
+    "prebuild": {
+      "executor": "@nx/expo:prebuild",
+      "options": {}
+    },
+    "export": {
+      "executor": "@nx/expo:export",
+      "options": {
+        "platform": "all",
+        "outputDir": "dist/apps/jatt-mobile"
+      }
     }
   }
 }
