@@ -38,6 +38,8 @@ env:
   NODE_VERSION: '24'
   TIMESTAMP: ''
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+  BUILD_MOBILE: ${{ github.event.inputs.build_mobile || false }}
+  RUN_ALL: ${{ github.event.inputs.run_all || false }}
 
 jobs:
   setup:
@@ -140,28 +142,28 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Set Nx SHAs
-        if: !inputs.run_all
+        if: ${{ !env.RUN_ALL }}
         uses: nrwl/nx-set-shas@v5
         with:
           fallback-sha: 'e2a12bdd38b114c17971fdd29870130d6aa57a63'
 
       - name: Build, Test, and Publish affected projects
-        if: !inputs.run_all
+        if: ${{ !env.RUN_ALL }}
         run: |
           pnpm nx affected -t restore
           args=("test" "build" "publish" "-c" "ci")
-          if [ "${{ inputs.build_mobile }}" != "true" ]; then
+          if [ "${{ env.BUILD_MOBILE }}" != "true" ]; then
             echo "Excluding jatt-mobile"
             args+=("--exclude" "jatt-mobile")
           fi
           pnpm nx affected -t "${args[@]}"
 
       - name: Build, Test, and Publish all projects
-        if: inputs.run_all
+        if: ${{ env.RUN_ALL }}
         run: |
           pnpm nx run-many -t restore
           args=("test" "build" "publish" "-c" "ci")
-          if [ "${{ inputs.build_mobile }}" != "true" ]; then
+          if [ "${{ env.BUILD_MOBILE }}" != "true" ]; then
             echo "Excluding jatt-mobile"
             args+=("--exclude" "jatt-mobile")
           fi
@@ -209,7 +211,7 @@ jobs:
             echo "api_exists=false" >> $GITHUB_OUTPUT
           fi
 
-          if [ "${{ github.event_name }}" == "workflow_dispatch" ] && [ "${{ inputs.run_all }}" == "true" ]; then
+          if [ "${{ env.RUN_ALL }}" == "true" ]; then
             echo "Running all, will build ai-service"
             echo "ai_affected=true" >> $GITHUB_OUTPUT
           elif pnpm nx show projects --affected 2>/dev/null | grep -q "jatt-ai-service"; then
