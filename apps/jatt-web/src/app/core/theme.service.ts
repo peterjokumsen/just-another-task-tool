@@ -1,4 +1,11 @@
-import { Injectable, signal, effect, inject, InjectionToken, DOCUMENT } from '@angular/core';
+import {
+  Injectable,
+  signal,
+  effect,
+  inject,
+  InjectionToken,
+  DOCUMENT,
+} from '@angular/core';
 import {
   DARK_THEME,
   LIGHT_THEME,
@@ -6,13 +13,15 @@ import {
   ThemeTokens,
 } from '@just-another-task-tool/shared-styles';
 
-export const THEMES = new InjectionToken<{ light: ThemeTokens, dark: ThemeTokens }>('THEMES');
+export const THEMES = new InjectionToken<{
+  light: ThemeTokens;
+  dark: ThemeTokens;
+}>('THEMES');
 
 @Injectable({
   providedIn: 'root',
 })
 export class ThemeService {
-  private document = inject(DOCUMENT);
   private themes = inject(THEMES, { optional: true }) ?? {
     light: LIGHT_THEME,
     dark: DARK_THEME,
@@ -22,7 +31,7 @@ export class ThemeService {
   constructor() {
     effect(() => {
       const currentTheme = this.theme();
-      this.applyTheme(currentTheme === 'light' ? LIGHT_THEME : DARK_THEME);
+      this.applyTheme(this.themes[currentTheme]);
       document.documentElement.setAttribute('data-theme', currentTheme);
     });
   }
@@ -36,6 +45,10 @@ export class ThemeService {
   }
 
   private getInitialTheme(): 'light' | 'dark' {
+    // Apply base tokens (spacing, etc)
+    this.addVariables(BASE_TOKENS.spacing, 'spacing');
+    this.addVariables(BASE_TOKENS.typography, 'typography');
+
     if (typeof window !== 'undefined' && window.matchMedia) {
       return window.matchMedia('(prefers-color-scheme: dark)').matches
         ? 'dark'
@@ -44,22 +57,16 @@ export class ThemeService {
     return 'dark'; // Default to dark as per premium design
   }
 
+  private addVariables(values: { [id: string]: string }, prefix?: string) {
+    if (prefix && !prefix.endsWith('-')) prefix = `${prefix}-`;
+    for (const [key, value] of Object.entries(values)) {
+      const cssVarName = `--jatt-${prefix ?? ''}${key.replace(/([A-Z])/g, '-$1').toLowerCase()}`;
+      document.documentElement.style.setProperty(cssVarName, value);
+    }
+  }
+
   private applyTheme(tokens: ThemeTokens) {
-    const root = this.document.documentElement;
-
     // Apply colors
-    Object.entries(tokens.colors).forEach(([key, value]) => {
-      const cssVarName = `--jatt-${key.replace(/([A-Z])/g, '-$1').toLowerCase()}`;
-      root.style.setProperty(cssVarName, value);
-    });
-
-    // Apply base tokens (spacing, etc)
-    Object.entries(BASE_TOKENS.spacing).forEach(([key, value]) => {
-      root.style.setProperty(`--jatt-spacing-${key}`, value);
-    });
-
-    Object.entries(BASE_TOKENS.typography).forEach(([key, value]) => {
-      root.style.setProperty(`--jatt-typography-${key.replace(/([A-Z])/g, '-$1').toLowerCase()}`, value);
-    });
+    this.addVariables(tokens.colors);
   }
 }
