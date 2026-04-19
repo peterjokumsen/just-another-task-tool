@@ -1,3 +1,7 @@
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Azure.Functions.Worker;
+
 namespace jatt_api.Models;
 
 /**
@@ -22,4 +26,32 @@ public record TaskRecord
   public DateTime? DueDate { get; init; }
   public string UserId { get; init; } = string.Empty;
   public DateTime CreatedAt { get; init; }
+}
+
+public record CreateTaskRequest
+{
+  public string Title { get; init; } = string.Empty;
+  public string Description { get; init; } = string.Empty;
+  public TaskPriority Priority { get; init; }
+  public string[] Tags { get; init; } = [];
+  public DateTime? DueDate { get; init; }
+  public string UserId { get; init; } = string.Empty;
+}
+
+public record GetTaskQuery
+{
+  public string UserId { get; init; } = string.Empty;
+}
+
+public class CreateTaskResponse
+{
+  [CosmosDBOutput(
+    databaseName: "JattDb",
+    containerName: "Tasks",
+    Connection = "CosmosDbConnectionString"
+  )]
+  public required TaskRecord Task { get; init; }
+
+  [HttpResult]
+  public required IResult HttpResponse { get; init; }
 }
