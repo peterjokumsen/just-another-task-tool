@@ -18,9 +18,7 @@
       "@just-another-task-tool/shared-styles": [
         "libs/shared-styles/src/index.ts"
       ],
-      "@just-another-task-tool/shared-models": [
-        "libs/shared-models/src/index.ts"
-      ]
+      "@just-another-task-tool/api-client": ["libs/api-client/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]
