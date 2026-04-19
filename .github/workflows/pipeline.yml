@@ -272,6 +272,15 @@ jobs:
           retention-days: 7
           if-no-files-found: ignore
 
+      - name: Inject Production Config
+        run: |
+          if [ -d "dist/apps/jatt-web/browser" ]; then
+            echo '{"apiBaseUrl": "https://func-jatt-dev.azurewebsites.net/api"}' > dist/apps/jatt-web/browser/config.json
+            echo "Injected production API URL into config.json"
+          else
+            echo "dist/apps/jatt-web/browser not found, skipping config injection"
+          fi
+
       - name: Upload web artifact
         uses: actions/upload-artifact@v7
         with:
