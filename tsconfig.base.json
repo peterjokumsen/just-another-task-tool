@@ -17,6 +17,9 @@
     "paths": {
       "@just-another-task-tool/shared-styles": [
         "libs/shared-styles/src/index.ts"
+      ],
+      "@just-another-task-tool/shared-models": [
+        "libs/shared-models/src/index.ts"
       ]
     }
   },
