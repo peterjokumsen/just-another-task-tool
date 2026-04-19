@@ -10,17 +10,22 @@ public class TaskFunctions(CosmosClient cosmosClient, ILogger<TaskFunctions> log
 {
   [Function("GetTasks")]
   public async Task<IResult> GetTasks(
-    [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "tasks")]
-    [AsParameters]
-      GetTaskQuery query
+    [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "tasks")] HttpRequest req
   )
   {
+    var userId = req.Query["userId"].ToString();
+    if (string.IsNullOrEmpty(userId))
+    {
+      logger.LogWarning("GetTasks called without userId");
+      return Results.BadRequest("Missing userId query parameter");
+    }
+
     var container = cosmosClient.GetContainer("JattDb", "Tasks");
     var sql = "SELECT * FROM c WHERE c.userId = @userId";
-    var q = new QueryDefinition(sql).WithParameter("@userId", query.UserId);
+    var q = new QueryDefinition(sql).WithParameter("@userId", userId);
 
     if (logger.IsEnabled(LogLevel.Information))
-      logger.LogInformation("Querying tasks for userId={UserId}", query.UserId);
+      logger.LogInformation("Querying tasks for userId={UserId}", userId);
 
     var iterator = container.GetItemQueryIterator<TaskRecord>(q);
     var tasks = new List<TaskRecord>();
