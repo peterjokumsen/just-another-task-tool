@@ -397,6 +397,8 @@ jobs:
           action: 'upload'
           app_location: '.'
           skip_app_build: true
+        env:
+          VITE_MESSAGE: 'Hello from GitHub Actions!'
 
       - name: Download api artifact
         if: needs.build.outputs.api_artifact_exists == 'true'
