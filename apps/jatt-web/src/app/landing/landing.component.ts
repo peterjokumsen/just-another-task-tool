@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
+import { environment } from '../../environments/environment';
 
 @Component({
   selector: 'app-landing',
@@ -10,6 +11,7 @@ import { RouterLink } from '@angular/router';
   styleUrl: './landing.component.css',
 })
 export class LandingComponent {
+  message = environment.message;
   features = [
     {
       title: 'AI-Powered Tagging',

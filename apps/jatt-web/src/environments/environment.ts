@@ -1,4 +1,4 @@
 export const environment = {
   production: false,
-  apiBaseUrl: 'http://localhost:7071',
+  message: import.meta.env.VITE_MESSAGE,
 };
