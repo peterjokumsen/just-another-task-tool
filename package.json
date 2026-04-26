@@ -99,6 +99,7 @@
     "metro-resolver": "~0.82.4",
     "nx": "22.6.4",
     "prettier": "~3.6.2",
+    "prettier-plugin-organize-imports": "^4.3.0",
     "react-native-svg": "15.15.3",
     "react-native-svg-transformer": "~1.5.1",
     "react-native-svg-web": "~1.0.9",
