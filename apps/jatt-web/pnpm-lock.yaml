@@ -1,0 +1,70 @@
+lockfileVersion: '9.0'
+
+settings:
+  autoInstallPeers: true
+  excludeLinksFromLockfile: false
+
+importers:
+  .:
+    dependencies:
+      '@azure/msal-angular':
+        specifier: ^5.2.1
+        version: 5.2.1(@azure/msal-browser@5.8.0)(rxjs@7.8.2)
+      '@azure/msal-browser':
+        specifier: ^5.8.0
+        version: 5.8.0
+
+packages:
+  '@azure/msal-angular@5.2.1':
+    resolution:
+      {
+        integrity: sha512-s+xFcXexTbD3ESAVlqJchvqH7eqSNWpHS64TUMLb8drEGed/qE4SBa5YQV+6rR4Tv9HB3JNjHQ8s5wTEiVHA0w==,
+      }
+    peerDependencies:
+      '@azure/msal-browser': ^5.8.0
+      rxjs: ^7.0.0
+
+  '@azure/msal-browser@5.8.0':
+    resolution:
+      {
+        integrity: sha512-X7IZV77bN56l7sbLjkcbQJX1t3U4tgxqztDr/XFbUcUfKk+z2FavcLgKP+OYUNj0wl/pEEtV9lldW9siY8BuHQ==,
+      }
+    engines: { node: '>=0.8.0' }
+
+  '@azure/msal-common@16.5.1':
+    resolution:
+      {
+        integrity: sha512-WS9w9SfI8SEYO7mTnxGeZ3UwQfhAVYCWglYF2/7GNx3ioHiAs2gPkl9eSwVs8cPrmiGh+zi9ai/OOKoq4cyzDw==,
+      }
+    engines: { node: '>=0.8.0' }
+
+  rxjs@7.8.2:
+    resolution:
+      {
+        integrity: sha512-dhKf903U/PQZY6boNNtAGdWbG85WAbjT/1xYoZIC7FAY0yWapOBQVsVrDl58W86//e1VpMNBtRV4MaXfdMySFA==,
+      }
+
+  tslib@2.8.1:
+    resolution:
+      {
+        integrity: sha512-oJFu94HQb+KVduSUQL7wnpmqnfmLsOA/nAh6b6EH0wCEoK0/mPeXU6c3wKDV83MkOuHPRHtSXKKU99IBazS/2w==,
+      }
+
+snapshots:
+  '@azure/msal-angular@5.2.1(@azure/msal-browser@5.8.0)(rxjs@7.8.2)':
+    dependencies:
+      '@azure/msal-browser': 5.8.0
+      rxjs: 7.8.2
+      tslib: 2.8.1
+
+  '@azure/msal-browser@5.8.0':
+    dependencies:
+      '@azure/msal-common': 16.5.1
+
+  '@azure/msal-common@16.5.1': {}
+
+  rxjs@7.8.2:
+    dependencies:
+      tslib: 2.8.1
+
+  tslib@2.8.1: {}

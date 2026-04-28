@@ -2,6 +2,9 @@ import { Injectable } from '@angular/core';
 
 export interface AppConfig {
   apiBaseUrl: string;
+  clientId: string;
+  tenantId: string;
+  apiScope: string;
 }
 
 @Injectable({
@@ -23,11 +26,26 @@ export class ConfigService {
       // Fallback to defaults if loading fails
       this.config = {
         apiBaseUrl: 'http://localhost:7071',
+        clientId: '',
+        tenantId: '',
+        apiScope: '',
       };
     }
   }
 
   get apiBaseUrl(): string {
     return this.config?.apiBaseUrl ?? 'http://localhost:7071';
+  }
+
+  get clientId(): string {
+    return this.config?.clientId ?? '';
+  }
+
+  get tenantId(): string {
+    return this.config?.tenantId ?? '';
+  }
+
+  get apiScope(): string {
+    return this.config?.apiScope ?? '';
   }
 }

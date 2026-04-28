@@ -31,7 +31,13 @@
     "react": "19.2.0",
     "react-dom": "19.2.0",
     "react-native": "0.83.4",
-    "rxjs": "~7.8.0"
+    "rxjs": "~7.8.0",
+    "@azure/msal-browser": "^5.8.0",
+    "@azure/msal-angular": "^5.2.1",
+    "expo-auth-session": "^55.0.15",
+    "expo-crypto": "^55.0.14",
+    "expo-secure-store": "^55.0.13",
+    "expo-web-browser": "^55.0.14"
   },
   "devDependencies": {
     "@angular-devkit/core": "~21.2.0",

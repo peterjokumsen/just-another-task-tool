@@ -8,6 +8,7 @@
     "owner": "pj-org",
     "slug": "just-another-task-tool",
     "name": "JATT",
+    "scheme": "jatt-mobile",
     "version": "1.0.0",
     "orientation": "portrait",
     "userInterfaceStyle": "automatic",

@@ -1,11 +1,15 @@
+using System.Security.Claims;
 using jatt_api.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Azure.Cosmos;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Logging;
+using Microsoft.Identity.Web.Resource;
 
 namespace jatt_api.Function;
 
+[Authorize]
 public class TaskFunctions(CosmosClient cosmosClient, ILogger<TaskFunctions> logger)
 {
   [Function("GetTasks")]
@@ -13,11 +17,14 @@ public class TaskFunctions(CosmosClient cosmosClient, ILogger<TaskFunctions> log
     [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "tasks")] HttpRequest req
   )
   {
-    var userId = req.Query["userId"].ToString();
+    var userId =
+      req.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value
+      ?? req.HttpContext.User.FindFirst("oid")?.Value;
+
     if (string.IsNullOrEmpty(userId))
     {
-      logger.LogWarning("GetTasks called without userId");
-      return Results.BadRequest("Missing userId query parameter");
+      logger.LogWarning("GetTasks called without authenticated user ID");
+      return Results.Unauthorized();
     }
 
     var container = cosmosClient.GetContainer("JattDb", "Tasks");
@@ -51,6 +58,15 @@ public class TaskFunctions(CosmosClient cosmosClient, ILogger<TaskFunctions> log
     if (logger.IsEnabled(LogLevel.Information))
       logger.LogInformation("Creating task with title: {Title}", req.Title);
 
+    var userId =
+      req.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value
+      ?? req.HttpContext.User.FindFirst("oid")?.Value;
+
+    if (string.IsNullOrEmpty(userId))
+    {
+      return new CreateTaskResponse { HttpResponse = Results.Unauthorized() };
+    }
+
     var newTask = new TaskRecord
     {
       Id = Guid.NewGuid().ToString(),
@@ -60,7 +76,7 @@ public class TaskFunctions(CosmosClient cosmosClient, ILogger<TaskFunctions> log
       Priority = req.Priority,
       Tags = req.Tags,
       DueDate = req.DueDate,
-      UserId = req.UserId,
+      UserId = userId,
     };
 
     return new CreateTaskResponse

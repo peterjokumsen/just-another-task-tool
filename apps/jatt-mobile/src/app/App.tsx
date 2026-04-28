@@ -1,36 +1,26 @@
 /* eslint-disable jsx-a11y/accessible-emoji */
-import React, { useState } from 'react';
 import {
-  SafeAreaView,
-  StyleSheet,
-  ScrollView,
-  View,
-  Text,
-  StatusBar,
-  TouchableOpacity,
-  useColorScheme,
-  Dimensions,
-  Platform,
-} from 'react-native';
-import * as SplashScreen from 'expo-splash-screen';
-import {
-  useFonts,
   FiraCode_400Regular,
   FiraCode_500Medium,
   FiraCode_600SemiBold,
   FiraCode_700Bold,
+  useFonts,
 } from '@expo-google-fonts/fira-code';
-import Svg, {
-  Path,
-  Defs,
-  LinearGradient as SvgGradient,
-  Stop,
-} from 'react-native-svg';
+import { DARK_THEME, LIGHT_THEME } from '@just-another-task-tool/shared-styles';
+import * as SplashScreen from 'expo-splash-screen';
+import React, { useState } from 'react';
 import {
-  LIGHT_THEME,
-  DARK_THEME,
-  BASE_TOKENS,
-} from '@just-another-task-tool/shared-styles';
+  Dimensions,
+  SafeAreaView,
+  ScrollView,
+  StatusBar,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  useColorScheme,
+  View,
+} from 'react-native';
+import { useAuth } from './hooks/useAuth';
 
 const { width } = Dimensions.get('window');
 
@@ -70,6 +60,7 @@ export const App = () => {
   const colorScheme = useColorScheme();
   const theme = colorScheme === 'dark' ? DARK_THEME : LIGHT_THEME;
   const [currentScreen, setCurrentScreen] = useState<Screen>('landing');
+  const { token, login, logout } = useAuth();
 
   React.useEffect(() => {
     if (fontsLoaded) {
@@ -88,10 +79,10 @@ export const App = () => {
       </TouchableOpacity>
       <TouchableOpacity
         style={styles.loginBtn}
-        onPress={() => setCurrentScreen('login')}
+        onPress={token ? logout : () => setCurrentScreen('login')}
       >
         <Text style={[styles.loginText, { color: theme.colors.textSecondary }]}>
-          Login
+          {token ? 'Logout' : 'Login'}
         </Text>
       </TouchableOpacity>
     </View>
@@ -178,13 +169,17 @@ export const App = () => {
         all your devices.
       </Text>
       <TouchableOpacity
-        style={styles.btnSecondary}
-        onPress={() => setCurrentScreen('landing')}
+        style={styles.btnPrimary}
+        onPress={() => {
+          if (type === 'login') {
+            login();
+          } else {
+            setCurrentScreen('landing');
+          }
+        }}
       >
-        <Text
-          style={[styles.btnSecondaryText, { color: theme.colors.textPrimary }]}
-        >
-          Back to Home
+        <Text style={styles.btnPrimaryText}>
+          {type === 'login' ? 'Sign In with Azure' : 'Back to Home'}
         </Text>
       </TouchableOpacity>
     </View>
