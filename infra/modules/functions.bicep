@@ -25,6 +25,9 @@ param runtimeVersion string = '10.0'
 @description('App Insights instrumentation key')
 param appInsightsInstrumentationKey string = ''
 
+@description('Additional app settings')
+param appSettings object = {}
+
 resource functionsAppServicePlan 'Microsoft.Web/serverfarms@2024-04-01' = {
   name: '${name}-asp'
   location: location
@@ -85,7 +88,7 @@ resource functionsApp 'Microsoft.Web/sites@2024-04-01' = {
       }
     }
     siteConfig: {
-      appSettings: [
+      appSettings: union([
         {
           name: 'AzureWebJobsStorage'
           value: 'DefaultEndpointsProtocol=https;AccountName=${storageAccountName};EndpointSuffix=${environment().suffixes.storage};AccountKey=${storageAccount.listKeys().keys[0].value}'
@@ -94,15 +97,10 @@ resource functionsApp 'Microsoft.Web/sites@2024-04-01' = {
           name: 'APPINSIGHTS_INSTRUMENTATIONKEY'
           value: appInsightsInstrumentationKey
         }
-        /*{
-          name: 'CosmosDbConnectionString'
-          value: cosmosDbConnectionString
-        }
-        {
-          name: 'CosmosDbDatabaseId'
-          value: cosmosDbDatabaseId
-        }*/
-      ]
+      ], map(items(appSettings), item => {
+        name: item.key
+        value: item.value
+      }))
     }
     httpsOnly: true
   }

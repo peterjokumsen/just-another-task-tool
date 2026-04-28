@@ -18,6 +18,13 @@ param timestamp string
 
 var resourceSuffix = '${baseName}-${environment}'
 
+module auth 'modules/auth.bicep' = {
+  name: 'auth-deployment-${timestamp}'
+  params: {
+    environment: environment
+  }
+}
+
 module appInsights 'modules/appinsights.bicep' = {
   name: 'appinsights-deployment-${timestamp}'
   params: {
@@ -55,6 +62,12 @@ module functions 'modules/functions.bicep' = {
     runtime: 'dotnet-isolated'
     runtimeVersion: '10.0'
     appInsightsInstrumentationKey: appInsights.outputs.instrumentationKey
+    appSettings: {
+      AzureAd__Instance: 'https://login.microsoftonline.com/'
+      AzureAd__TenantId: tenant().tenantId
+      AzureAd__ClientId: auth.outputs.apiClientId
+      AzureAd__Audience: auth.outputs.apiClientId
+    }
   }
 }
 
