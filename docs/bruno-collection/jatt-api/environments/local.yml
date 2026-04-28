@@ -1,0 +1,14 @@
+name: local
+variables:
+  - name: url
+    value: http://localhost:7071
+  - name: redirect_uri
+    value: https://localhost:4200/oauth/callback
+  - secret: true
+    name: tenant_id
+  - secret: true
+    name: client_id
+  - secret: true
+    name: api_client_id
+  - name: api_scope
+    value: api://{{api_client_id}}/access_as_user

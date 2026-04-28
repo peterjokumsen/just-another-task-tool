@@ -1,0 +1,14 @@
+name: dev
+variables:
+  - name: url
+    value: https://func-jatt-dev.azurewebsites.net
+  - name: redirect_uri
+    value: https://www.usebruno.com/oauth/callback
+  - secret: true
+    name: tenant_id
+  - secret: true
+    name: client_id
+  - secret: true
+    name: api_client_id
+  - name: api_scope
+    value: api://{{api_client_id}}/access_as_user

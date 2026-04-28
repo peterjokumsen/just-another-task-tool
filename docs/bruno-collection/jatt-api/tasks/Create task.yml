@@ -1,0 +1,25 @@
+info:
+  name: Create task
+  type: http
+  seq: 2
+
+http:
+  method: POST
+  url: '{{url}}/api/tasks'
+  body: json
+  auth: inherit
+
+body:json: |-
+  {
+    "title": "Task from Bruno",
+    "description": "Verify auth and claims logic",
+    "priority": "Medium",
+    "tags": ["bruno", "test"],
+    "dueDate": "2026-12-31T23:59:59Z"
+  }
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
