@@ -50,7 +50,7 @@ public class CreateTaskResponse
     containerName: "Tasks",
     Connection = "CosmosDbConnectionString"
   )]
-  public required TaskRecord Task { get; init; }
+  public TaskRecord? Task { get; init; }
 
   [HttpResult]
   public required IResult HttpResponse { get; init; }

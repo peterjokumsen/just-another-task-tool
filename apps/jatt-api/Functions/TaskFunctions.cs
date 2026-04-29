@@ -52,11 +52,11 @@ public class TaskFunctions(CosmosClient cosmosClient, ILogger<TaskFunctions> log
 
   [Function("CreateTask")]
   public async Task<CreateTaskResponse> CreateTask(
-    [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "tasks")] CreateTaskRequest req
+    [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "tasks")] HttpRequest req, CreateTaskRequest body
   )
   {
     if (logger.IsEnabled(LogLevel.Information))
-      logger.LogInformation("Creating task with title: {Title}", req.Title);
+      logger.LogInformation("Creating task with title: {Title}", body.Title);
 
     var userId =
       req.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value
@@ -71,11 +71,11 @@ public class TaskFunctions(CosmosClient cosmosClient, ILogger<TaskFunctions> log
     {
       Id = Guid.NewGuid().ToString(),
       CreatedAt = DateTime.UtcNow,
-      Title = req.Title,
-      Description = req.Description,
-      Priority = req.Priority,
-      Tags = req.Tags,
-      DueDate = req.DueDate,
+      Title = body.Title,
+      Description = body.Description,
+      Priority = body.Priority,
+      Tags = body.Tags,
+      DueDate = body.DueDate,
       UserId = userId,
     };
 
