@@ -50,7 +50,7 @@ export function MSALInstanceFactory(
           console.log(message);
         },
         logLevel: LogLevel.Info,
-        containsPii: false,
+        piiLoggingEnabled: false,
       },
     },
   });
