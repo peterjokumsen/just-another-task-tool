@@ -58,6 +58,11 @@ jobs:
         uses: azure/cli@v3
         with:
           inlineScript: |
-            az group delete \
-              --name "rg-jatt-dev-pr" \
-              --yes
+            if [ "$(az group exists --name rg-jatt-dev-pr)" == "true" ]; then
+              az group delete \
+                --name "rg-jatt-dev-pr" \
+                --yes
+              echo "PR Resource group exists."
+            else
+              echo "PR Resource group does not exist."
+            fi
